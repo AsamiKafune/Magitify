@@ -1,0 +1,7 @@
+*.mp3
+/backend/node_modules
+*.exe
+frontend/yarn.lock
+frontend/tsconfig.json
+frontend/tailwind.config.js
+frontend/server/tsconfig.json
