@@ -465,7 +465,7 @@ const roominfo = ref({
 })
 
 const room_url = () => {
-    return window.location.host + '?code=' + roominfo.value.id
+    return window.location.origin + '?code=' + roominfo.value.id
 }
 
 onMounted(() => {
