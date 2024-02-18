@@ -69,6 +69,52 @@
             </div>
         </div>
     </div>
+    <div v-if="isJoin"
+        class="fixed right-0 top-[50svh] rounded-s-lg bg-zinc-900/80 backdrop-blur-sm translate-y-[-50%] z-20 flex justify-center items-center">
+        <button @click="toggleChat = !toggleChat"
+            class="absolute left-[-30px] w-[30px] flex items-center justify-center h-[60px] bg-zinc-900/80 rounded-s-lg">
+            <i class="fas fa-comments-alt fa-fw text-xs"></i>
+        </button>
+        <div :class="{ 'w-[230px]': toggleChat, 'w-[0px]': !toggleChat }"
+            class="grid items-center relative transition-all duration-200 overflow-x-clip">
+            <div class="flex gap-2 justify-between items-center w-full px-3 py-1.5">
+                <div>
+                    <h1 class="items-center flex text-xl">
+                        ห้องแชท
+                    </h1>
+                    <p class="text-xs opacity-50">
+                        ID: {{ roominfo.id }}
+                    </p>
+                </div>
+            </div>
+            <div class="h-[300px] w-[225px] px-3 py-1.5 mb-1 break-words overflow-y-auto">
+                <div v-for="item in messageList">
+                    <div v-if="item.msgType == '1'" class="ps-4 flex gap-1 my-2 text-sm justify-center w-full">
+                        <div class="truncate">
+                            {{ item.name }} {{ item.msg }}
+                        </div>
+                    </div>
+                    <div v-else class="flex gap-2 my-2 text-sm">
+                        <div :class="{ 'bg-blue-400': !item.isOwner, 'bg-red-400': item.isOwner }"
+                            class="rounded-xl h-fit px-2 truncate w-[80px] text-center">
+                            {{ item.name }}
+                        </div>
+                        <div class="break-words w-[110px]">
+                            {{ item.msg }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-black/20 py-1.5 flex ps-2 w-full rounded-b-lg">
+                <input v-model="messageInput" type="text" placeholder="เขียนข้อความ..."
+                    class="w-full outline-none bg-transparent">
+                <button @click="sendChat()"
+                    class="min-w-[30px] outline-none text-center transition-all active:scale-90 hover:opacity-85">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
     <div v-if="toggleRoomDetail"
         class="fixed top-0 left-0 z-40 w-full min-h-[calc(100dvh)] flex justify-center items-center bg-black/50 backdrop-blur-sm">
         <div class="bg-black/90 rounded-xl p-4 min-w-[300px]">
@@ -203,8 +249,7 @@
                     </div>
                     <div class="rounded-lg pb-2 flex gap-2 overflow-x-auto max-w-full max-h-[120px]">
                         <div v-for="item, idx in roominfo.queues">
-                            <div
-                                class="bg-zinc-900 rounded-md overflow-clip flex w-[350px] relative shadow-lg">
+                            <div class="bg-zinc-900 rounded-md overflow-clip flex w-[350px] relative shadow-lg">
                                 <div v-if="(idx > 0) && ((isJoin && roominfo.canRequest) || isHost || !isJoin)"
                                     class="absolute flex gap-2 bottom-2 bg-black/60 backdrop-blur-sm rounded-r-xl pr-3 ps-2 py-1">
                                     <button class="text-white hover:text-white/80 transition-all active:scale-75"
@@ -220,8 +265,8 @@
                                     class="absolute items-center flex gap-2 bottom-2 bg-black/60 backdrop-blur-sm rounded-r-xl pr-3 ps-2 py-1">
                                     {{ roominfo.isPlaying ? "🔴 กำลังเล่น" : "หยุดชั่วคราว" }}
                                 </div>
-                                <img :src="item.img" class="aspect-video object-cover object-center rounded-e-md" width="130"
-                                    alt="thumbnail">
+                                <img :src="item.img" class="aspect-video object-cover object-center rounded-e-md"
+                                    width="130" alt="thumbnail">
                                 <div class="text-start p-3 min-w-[120px]">
                                     <p class="truncate text-xl">
                                         {{ item.title }}
@@ -304,7 +349,7 @@
                         class="text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
                         <div class="flex items-center justify-center text-white rounded-xl">
                             <i class="fas fa-headset"></i>
-                        </div> ตั้งค่า
+                        </div> {{ (isHost && isJoin) ? "ตั้งค่า" : "ข้อมูลห้อง" }}
                     </button>
                     <button @click="syncmusic()" v-if="isJoin && !isHost"
                         class="text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
@@ -393,7 +438,6 @@ const swal = $swal.mixin({
     },
     buttonsStyling: false
 })
-
 function showloading() {
     swal.fire({
         html: "<div class=''><h1 class='text-3xl font-bold'>MAGITIFY</h1><p>กำลังรอการตอบสนองจาก SERVER</p></div>",
@@ -404,15 +448,14 @@ function showloading() {
         }
     })
 }
-
 const config = useRuntimeConfig().public;
-
 const inviteCode = useRoute().query?.code
 
 import { io } from 'socket.io-client'
 const connected = ref(false)
 const socket = ref(null);
 
+const toggleChat = ref(false);
 const toggleController = ref(false);
 const toggleRoomDetail = ref(false);
 const toggleJoinRoom = ref(false);
@@ -513,11 +556,17 @@ onMounted(() => {
         myid.value = data.yourid;
         roominfo.value.users = data.users;
         socket.value.emit('send', { invitecode: roomInputId.value, data: { type: "request_sync", userId: myid.value } });
+        socket.value.emit('send', { invitecode: roomInputId.value, data: { msgType: "1", type: "chat", value: (roominfo.value.users.find(e => e.uid == myid.value))?.name ?? "NULL", userId: "Join: " } });
         isJoin.value = true;
     })
     server.on("leave_info", (data) => {
 
-        //set join!
+        if (data.destory) return swal.fire({
+            html: "<div><h1 class='text-3xl font-bold'>สำคัญ</h1><p>เจ้าของห้องได้ปิดห้องแล้ว</p></div>",
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            showConfirmButton: true,
+        }).then(()=> window.location.replace(window.location.origin))
         $swal.mixin({
             toast: true,
             position: "top-end",
@@ -532,10 +581,16 @@ onMounted(() => {
             icon: "success",
             html: "<div><h1 class='text-white/60 font-bold'>NOTIFY</h1><p>" + roominfo.value.users.find(e => e.uid == data.uid).name + " ออกห้องไปแล้ว</p></div>"
         });
+        socket.value.emit('send', { invitecode: roominfo.value.id, data: { msgType: "1", type: "chat", value: (roominfo.value.users.find(e => e.uid == data.uid))?.name ?? "NULL", userId: "Leave: " } });
         //update users in room
         roominfo.value.users = data.users;
     })
     server.on("message", (msg) => {
+
+        if (msg.data.type == "chat") {
+            return updateChat(msg.data.value, msg.data.userId, msg.data.msgType)
+        }
+
         //host data
         if (isHost.value && isJoin.value && msg.data.userId != myid.value) {
             if (msg.data.type == "request_sync") {
@@ -617,6 +672,32 @@ onMounted(() => {
         }
     })
 })
+
+const messageList = ref([]);
+const messageInput = ref("");
+async function sendChat() {
+    if (messageInput.value.length < 1) return;
+    socket.value.emit('send', { invitecode: roominfo.value.id, data: { msgType: "0", type: "chat", value: messageInput.value, userId: myid.value } });
+    messageInput.value = "";
+}
+
+async function updateChat(msg, title, msgType) {
+    if (msgType == "0") {
+        messageList.value = [{
+            msgType: msgType,
+            msg: msg,
+            name: (roominfo.value.users.find(e => e.uid == title))?.name ?? "NULL",
+            isOwner: (roominfo.value.users.find(e => e.uid == title))?.isOwner ?? false
+        }, ...messageList.value]
+    } else {
+        messageList.value = [{
+            msgType: msgType,
+            msg: msg,
+            name: title,
+            isOwner: false
+        }, ...messageList.value]
+    }
+}
 
 //listen toggeter
 async function host() {
@@ -757,7 +838,7 @@ async function addtoQueue(song, isServer) {
         });
         swal.close()
 
-        song.request = roominfo.value.users.find(e => e.uid == myid.value)?.name??"ฉัน";
+        song.request = roominfo.value.users.find(e => e.uid == myid.value)?.name ?? "ฉัน";
         if (isHost.value && isJoin.value) {
             //host
             socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "force_sync", action: false } });
