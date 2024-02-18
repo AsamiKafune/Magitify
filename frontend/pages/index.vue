@@ -566,7 +566,7 @@ onMounted(() => {
                 if (msg.data.type == "respone_sync") {
                     stop();
                     if (msg.data.room.isPlaying && msg.data.room.queues[0]) {
-                        play(msg.data.room.queues[0], msg.data.room.nowplaying.time.current);
+                        play(msg.data.room.queues[0], msg.data.room.nowplaying.time.current, "server");
                     }
 
                     roominfo.value = msg.data.room;
@@ -586,7 +586,7 @@ onMounted(() => {
                     if (msg.data.action) {
                         stop();
                         if (_c.room.isPlaying && _c.room.queues[0]) {
-                            play(_c.room.queues[0], _c.room.nowplaying.time.current);
+                            play(_c.room.queues[0], _c.room.nowplaying.time.current, "server");
                         }
                     }
                     roominfo.value = msg.data.room;
@@ -604,6 +604,9 @@ onMounted(() => {
         if (isJoin.value && msg.data.ignore != myid.value) {
             if (msg.data.type == "addQueueWithPerm") {
                 addtoQueue(msg.data.value, "server")
+            }
+            if (msg.data.type == "request_play") {
+                play(msg.data.value, 0, "server")
             }
             if (msg.data.type == "delQueueWithPerm") {
                 removeQueue(msg.data.value, true)
@@ -720,10 +723,10 @@ async function forcePlay(id, isServer) {
     play(queue)
 }
 
-async function addtoQueue(song, type) {
+async function addtoQueue(song, isServer) {
     if (roominfo.value.queues.find(e => e.id == song.id)) return;
 
-    if (!type) {
+    if (!isServer) {
         showloading()
         const { data } = await useFetch(config.api + "/getsong", {
             method: 'POST',
@@ -749,15 +752,22 @@ async function addtoQueue(song, type) {
             icon: "error",
             html: "<div><h1 class='text-white/60 font-bold'>ผิดพลาด</h1><p>เพลงนี้ไม่มีในระบบ</p></div>"
         });
-    }
+        swal.close()
 
-    if (isHost.value && isJoin.value) {
-        socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "force_sync", action: false } });
-    } else if (!isHost.value && isJoin.value && roominfo.value.canRequest && type != "server") {
-        socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "addQueueWithPerm", ignore: myid.value, value: song } });
-    }
+        if (isHost.value && isJoin.value) {
+            //host
+            socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "force_sync", action: false } });
+        } else if (!isHost.value && isJoin.value && roominfo.value.canRequest) {
+            //client
+            socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "addQueueWithPerm", ignore: myid.value, value: song } });
+        }
 
-    swal.close()
+        //reset values
+        searchlist.value = [];
+        searchinput.value = "";
+        toggleSearch.value = false;
+    }
+    //node
     $swal.mixin({
         toast: true,
         position: "top-end",
@@ -774,14 +784,10 @@ async function addtoQueue(song, type) {
     });
 
     //force play
-    if (!roominfo.value.isPlaying) play(type?data.value.data:song);
+    if (!roominfo.value.isPlaying) play(song);
 
     //added queues
     roominfo.value.queues.push(song)
-    //reset values
-    searchlist.value = [];
-    searchinput.value = "";
-    toggleSearch.value = false;
 }
 
 async function stop() {
@@ -840,81 +846,86 @@ async function nextQueue(save, single) {
     return;
 }
 
-async function play(song, now) {
+async function play(song, now, isServer) {
     stop()
     //play logic!
     try {
-        showloading()
-        const canplay = await recheckfile(song.id)
-        if (!canplay) {
-            roominfo.value.queues.shift()
-            return swal.fire({
-                html: "<div><h1 class='text-3xl font-bold'>พบปัญหา</h1><p>ไม่พบเพลงในฐานข้อมูล</p></div>",
-                icon: "error",
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                allowOutsideClick: false,
-                didOpen: (toast) => {
-                    toast.onmouseleave = swal.resumeTimer
-                }
-            })
+        if (!isServer) {
+            showloading()
+            const canplay = await recheckfile(song.id)
+            if (!canplay) {
+                roominfo.value.queues.shift()
+                return swal.fire({
+                    html: "<div><h1 class='text-3xl font-bold'>พบปัญหา</h1><p>ไม่พบเพลงในฐานข้อมูล</p></div>",
+                    icon: "error",
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    allowOutsideClick: false,
+                    didOpen: (toast) => {
+                        toast.onmouseleave = swal.resumeTimer
+                    }
+                })
+            }
         }
         swal.close()
 
         //play logic
-
-        audio.value.src = config.api + "/music/" + song.id + '.mp3'
-        roominfo.value.nowplaying = {
-            data: song,
-            time: {
-                current: audio.value.currentTime,
-                duration: 0,
+        setTimeout(() => {
+            audio.value.src = config.api + "/music/" + song.id + '.mp3'
+            roominfo.value.nowplaying = {
+                data: song,
+                time: {
+                    current: audio.value.currentTime,
+                    duration: 0,
+                }
             }
-        }
-        roominfo.value.isPlaying = true;
-        audio.value.play();
-        if (now) audio.value.currentTime = now;
-        audio.value.volume = volume.value;
+            roominfo.value.isPlaying = true;
+            audio.value.play();
+            if (now) audio.value.currentTime = now;
+            audio.value.volume = volume.value;
 
-        //boardcast to everyone
-        if (isHost.value && isJoin.value) {
-            socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "force_sync", action: true } });
-        }
+            //boardcast to everyone
+            if (isHost.value && isJoin.value) {
+                socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "force_sync", action: true } });
+            } if (!isHost.value && isJoin.value && !isServer && roominfo.value.canRequest) {
+                socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "request_play", value: song, ignore: myid.value } });
+            }
 
-        audio.value.addEventListener('timeupdate', function () {
-            try {
-                roominfo.value.nowplaying.time.current = audio.value.currentTime
-                roominfo.value.nowplaying.time.duration = audio.value.duration
-            } catch (error) { }
+            audio.value.addEventListener('timeupdate', function () {
+                try {
+                    roominfo.value.nowplaying.time.current = audio.value.currentTime
+                    roominfo.value.nowplaying.time.duration = audio.value.duration
+                } catch (error) { }
 
-            if (audio.value) {
-                //next song
-                if (audio.value.currentTime >= audio.value.duration - 1) {
-                    if ((isJoin.value && isHost.value) || (!isJoin.value && !isHost.value)) {
-                        if (roominfo.value.repeat == 1)
-                            return play(song)
-                        if (roominfo.value.repeat == 2) {
-                            return nextQueue(true)
-                        }
-                        if (roominfo.value.repeat == 0) {
-                            if (!roominfo.value.queues[1]) return swal.fire({
-                                html: "<div><h1 class='text-3xl font-bold'>MAGITIFY</h1><p>คิวเพลงถูกเล่นทั้งหมดแล้ว</p></div>",
-                                icon: "success",
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true,
-                                allowOutsideClick: false,
-                                didOpen: (toast) => {
-                                    toast.onmouseleave = swal.resumeTimer
-                                }
-                            })
-                            return nextQueue(false)
+                if (audio.value) {
+                    //next song
+                    if (audio.value.currentTime >= audio.value.duration - 1) {
+                        if ((isJoin.value && isHost.value) || (!isJoin.value && !isHost.value)) {
+                            if (roominfo.value.repeat == 1)
+                                return play(song)
+                            if (roominfo.value.repeat == 2) {
+                                return nextQueue(true)
+                            }
+                            if (roominfo.value.repeat == 0) {
+                                if (!roominfo.value.queues[1]) return swal.fire({
+                                    html: "<div><h1 class='text-3xl font-bold'>MAGITIFY</h1><p>คิวเพลงถูกเล่นทั้งหมดแล้ว</p></div>",
+                                    icon: "success",
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true,
+                                    allowOutsideClick: false,
+                                    didOpen: (toast) => {
+                                        toast.onmouseleave = swal.resumeTimer
+                                    }
+                                })
+                                return nextQueue(false)
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }, 100);
     } catch (error) {
         console.log(error)
         swal.close()
