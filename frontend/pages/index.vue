@@ -182,7 +182,7 @@
                     </p>
                 </div>
             </div>
-            <div class="p-3 bg-black/80 w-full pb-[100px]">
+            <div class="p-3 bg-zinc-950/90 w-full pb-[100px]">
                 <!-- listmusic -->
                 <div class="flex mx-auto max-w-xs">
                     <button :disabled="isJoin && !isHost && !roominfo.canRequest"
@@ -203,7 +203,7 @@
                     </div>
                     <div class="rounded-lg pb-2 flex gap-2 overflow-x-auto max-w-full max-h-[120px]">
                         <div v-for="item, idx in roominfo.queues">
-                            <div :class="{ 'border-[1.5px] border-purple-400': idx == 0 }"
+                            <div
                                 class="bg-zinc-900 rounded-md overflow-clip flex w-[350px] relative shadow-lg">
                                 <div v-if="(idx > 0) && ((isJoin && roominfo.canRequest) || isHost || !isJoin)"
                                     class="absolute flex gap-2 bottom-2 bg-black/60 backdrop-blur-sm rounded-r-xl pr-3 ps-2 py-1">
@@ -217,20 +217,23 @@
                                     </button>
                                 </div>
                                 <div v-if="idx == 0"
-                                    class="absolute flex gap-2 bottom-2 bg-black/60 backdrop-blur-sm rounded-r-xl pr-3 ps-2 py-1">
-                                    {{ roominfo.isPlaying ? "กำลังเล่น" : "หยุดชั่วคราว" }}
+                                    class="absolute items-center flex gap-2 bottom-2 bg-black/60 backdrop-blur-sm rounded-r-xl pr-3 ps-2 py-1">
+                                    {{ roominfo.isPlaying ? "🔴 กำลังเล่น" : "หยุดชั่วคราว" }}
                                 </div>
-                                <img :src="item.img" class="aspect-video object-cover object-center" width="150"
+                                <img :src="item.img" class="aspect-video object-cover object-center rounded-e-md" width="130"
                                     alt="thumbnail">
                                 <div class="text-start p-3 min-w-[120px]">
-                                    <p class="truncate">
+                                    <p class="truncate text-xl">
                                         {{ item.title }}
                                     </p>
-                                    <div class="text-xs opacity-50 truncate">
+                                    <div class="text-sm opacity-50 truncate">
                                         {{ item.author.name }}
                                     </div>
                                     <div class="text-xs opacity-50 truncate">
-                                        {{ item.long }}
+                                        เพิ่มโดย: {{ item.request }}
+                                    </div>
+                                    <div class="text-xs opacity-50 truncate">
+                                        ระยะเวลา: {{ item.long }}
                                     </div>
                                 </div>
                             </div>
@@ -754,6 +757,7 @@ async function addtoQueue(song, isServer) {
         });
         swal.close()
 
+        song.request = roominfo.value.users.find(e => e.uid == myid.value)?.name??"ฉัน";
         if (isHost.value && isJoin.value) {
             //host
             socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "force_sync", action: false } });
@@ -766,26 +770,25 @@ async function addtoQueue(song, isServer) {
         searchlist.value = [];
         searchinput.value = "";
         toggleSearch.value = false;
+
+        $swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = swal.stopTimer;
+                toast.onmouseleave = swal.resumeTimer
+            }
+        }).fire({
+            icon: "success",
+            html: "<div><h1 class='text-white/60 font-bold'>เพลงถูกเพิ่มในคิว</h1><p>" + song.title.slice(0, 16) + "...</p></div>"
+        });
     }
-    //node
-    $swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            toast.onmouseenter = swal.stopTimer;
-            toast.onmouseleave = swal.resumeTimer
-        }
-    }).fire({
-        icon: "success",
-        html: "<div><h1 class='text-white/60 font-bold'>เพลงถูกเพิ่มในคิว</h1><p>" + song.title.slice(0, 16) + "...</p></div>"
-    });
 
     //force play
     if (!roominfo.value.isPlaying) play(song);
-
     //added queues
     roominfo.value.queues.push(song)
 }
