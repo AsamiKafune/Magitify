@@ -51,7 +51,8 @@
                     <p class="absolute left-4 top-1 text-xs text-white/40 pointer-events-none">username
                     </p>
                     <div class="flex bg-white/10 rounded-xl px-3">
-                        <input type="text" v-model="nickname" maxlength="13" class="w-full pt-5 bg-transparent pb-2 px-1 outline-none">
+                        <input type="text" v-model="nickname" maxlength="13"
+                            class="w-full pt-5 bg-transparent pb-2 px-1 outline-none">
                     </div>
                 </div>
                 <div class="relative">
@@ -149,8 +150,7 @@
                                     <i :class="{ 'text-rose-300': favlist.find(e => e.id == item.id) }"
                                         class="fas fa-thumbs-up text-xl"></i>
                                 </button>
-                                <button class="transition-all active:scale-90 hover:opacity-85"
-                                    @click="addtoQueue(item.id, 'search')">
+                                <button class="transition-all active:scale-90 hover:opacity-85" @click="addtoQueue(item)">
                                     <i class="fas fa-plus text-xl"></i>
                                 </button>
                             </div>
@@ -253,7 +253,7 @@
                                     <div
                                         class="flex gap-3 absolute bg-black/60 backdrop-blur-sm top-[-43px] right-0 px-3 py-1 rounded-s-xl ">
                                         <button v-if="((isJoin && roominfo.canRequest) || isHost || !isJoin)"
-                                            @click="addtoQueue(item?.id, 'favorite')">
+                                            @click="addtoQueue(item)">
                                             <i class="fas fa-plus text-xl"></i>
                                         </button>
                                         <button @click="fav(item?.id, 'favlist')">
@@ -366,7 +366,7 @@
                             class="w-full" type="range">
                     </div>
                     <div class="shadow flex gap-2 min-w-[100px] justify-center">
-                        <audio controls class="hidden" ref="audio" src=""/>
+                        <audio controls class="hidden" ref="audio" src="" />
                         <div class="flex items-center justify-center w-[20px]">
                             <i
                                 :class="{ 'fad fa-volume': volume > 0.5, 'fad fa-volume-down': volume < 0.5 > 0.1, 'fad fa-volume-mute': volume <= 0 }"></i>
@@ -465,7 +465,7 @@ const roominfo = ref({
 })
 
 const room_url = () => {
-    return window.location.host+'?code='+roominfo.value.id
+    return window.location.host + '?code=' + roominfo.value.id
 }
 
 onMounted(() => {
@@ -603,7 +603,7 @@ onMounted(() => {
         //from client boardcast ignore me
         if (isJoin.value && msg.data.ignore != myid.value) {
             if (msg.data.type == "addQueueWithPerm") {
-                addtoQueue(msg.data.value.id, "server", msg.data.value)
+                addtoQueue(msg.data.value, "server")
             }
             if (msg.data.type == "delQueueWithPerm") {
                 removeQueue(msg.data.value, true)
@@ -623,7 +623,7 @@ async function host() {
     socket.value.emit('create', { invitecode: roominfo.value.id, name: nickname.value, users: roominfo.value.users });
 }
 
-if(inviteCode) {
+if (inviteCode) {
     toggleJoinRoom.value = true;
     roomInputId.value = inviteCode;
 }
@@ -720,36 +720,44 @@ async function forcePlay(id, isServer) {
     play(queue)
 }
 
-async function addtoQueue(id, type, songinfo) {
-    //add queues logic
-    let song;
-    if (type == "search") {
-        song = searchlist.value.find(e => e.id == id)
-    } else if (type == "favorite") {
-        song = favlist.value.find(e => e.id == id)
+async function addtoQueue(song, type) {
+    if (roominfo.value.queues.find(e => e.id == song.id)) return;
+
+    if (!type) {
+        showloading()
+        const { data } = await useFetch(config.api + "/getsong", {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "song": song
+            })
+        })
+
+        if (data.value?.code != 1) return $swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = swal.stopTimer;
+                toast.onmouseleave = swal.resumeTimer
+            }
+        }).fire({
+            icon: "error",
+            html: "<div><h1 class='text-white/60 font-bold'>ผิดพลาด</h1><p>เพลงนี้ไม่มีในระบบ</p></div>"
+        });
     }
 
-    if (songinfo) song = songinfo;
-
-    if (roominfo.value.queues.find(e => e.id == id)) return;
-
-    showloading()
-    const { data } = await useFetch(config.api + "/getsong", {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            "song": song
-        })
-    })
-    swal.close()
-
-    if (isHost.value && isJoin.value && !songinfo) {
+    if (isHost.value && isJoin.value) {
         socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "force_sync", action: false } });
     } else if (!isHost.value && isJoin.value && roominfo.value.canRequest && type != "server") {
         socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "addQueueWithPerm", ignore: myid.value, value: song } });
     }
+
+    swal.close()
     $swal.mixin({
         toast: true,
         position: "top-end",
@@ -766,7 +774,7 @@ async function addtoQueue(id, type, songinfo) {
     });
 
     //force play
-    if (!roominfo.value.isPlaying) play(data.value.data);
+    if (!roominfo.value.isPlaying) play(type?data.value.data:song);
 
     //added queues
     roominfo.value.queues.push(song)
@@ -855,7 +863,7 @@ async function play(song, now) {
         swal.close()
 
         //play logic
-        
+
         audio.value.src = config.api + "/music/" + song.id + '.mp3'
         roominfo.value.nowplaying = {
             data: song,
@@ -975,7 +983,7 @@ async function recheckfile(id) {
 }
 
 const timeString = (secs) => {
-    if(!secs) return "0:00";
+    if (!secs) return "0:00";
     let ss = Math.floor(secs),
         hh = Math.floor(ss / 3600),
         mm = Math.floor((ss - hh * 3600) / 60);
