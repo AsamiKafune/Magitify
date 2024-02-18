@@ -566,7 +566,7 @@ onMounted(() => {
             showConfirmButton: false,
             allowOutsideClick: false,
             showConfirmButton: true,
-        }).then(()=> window.location.replace(window.location.origin))
+        }).then(() => window.location.replace(window.location.origin))
         $swal.mixin({
             toast: true,
             position: "top-end",

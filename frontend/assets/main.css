@@ -59,6 +59,11 @@ body {
   background: transparent;
 }
 
+div:where(.swal2-icon).swal2-info {
+  border-color: #f5abf7 !important;
+  color: #f5abf7 !important;
+}
+
 div:where(.swal2-container) div:where(.swal2-popup) {
   display: none;
   position: relative;
