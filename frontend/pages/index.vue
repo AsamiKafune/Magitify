@@ -917,6 +917,7 @@ async function play(song, now) {
         });
     } catch (error) {
         console.log(error)
+        swal.close()
     }
 }
 
