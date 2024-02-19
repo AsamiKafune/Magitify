@@ -192,7 +192,7 @@
                             <div
                                 class="flex gap-3 absolute bg-black/60 backdrop-blur-sm top-[-40px] right-0 px-3 py-0.5 rounded-s-xl z-10">
                                 <button class="transition-all active:scale-90 hover:opacity-85"
-                                    @click="fav(item.id, 'search')">
+                                    @click="fav(item)">
                                     <i :class="{ 'text-rose-300': favlist.find(e => e.id == item.id) }"
                                         class="fas fa-thumbs-up text-xl"></i>
                                 </button>
@@ -249,12 +249,18 @@
                     </div>
                     <div class="rounded-lg pb-2 flex gap-2 overflow-x-auto max-w-full max-h-[120px]">
                         <div v-for="item, idx in roominfo.queues">
-                            <div class="bg-zinc-900 rounded-md overflow-clip flex w-[350px] relative shadow-lg">
+                            <div :class="{ 'border border-purple-400': idx == 0 }"
+                                class="bg-zinc-900 rounded-md overflow-clip flex w-[350px] relative shadow-lg">
                                 <div v-if="(idx > 0) && ((isJoin && roominfo.canRequest) || isHost || !isJoin)"
                                     class="absolute flex gap-2 bottom-2 bg-black/60 backdrop-blur-sm rounded-r-xl pr-3 ps-2 py-1">
                                     <button class="text-white hover:text-white/80 transition-all active:scale-75"
                                         v-if="(isJoin && isHost) || !isJoin" @click="forcePlay(item.id)">
                                         <i class="fas fa-play"></i>
+                                    </button>
+                                    <button class="text-white hover:text-white/80 transition-all active:scale-75"
+                                        @click="fav(item)">
+                                        <i :class="{ 'text-rose-300': favlist.find(e => e.id == item.id) }"
+                                            class="fas fa-heart"></i>
                                     </button>
                                     <button class="text-white hover:text-white/80 transition-all active:scale-75"
                                         @click="removeQueue(item.id)">
@@ -304,7 +310,7 @@
                                             @click="addtoQueue(item)">
                                             <i class="fas fa-plus text-xl"></i>
                                         </button>
-                                        <button @click="fav(item?.id, 'favlist')">
+                                        <button @click="fav(item)">
                                             <i class="fas fa-trash text-xl"></i>
                                         </button>
                                     </div>
@@ -371,7 +377,7 @@
                         <img @click="toggleController = !toggleController"
                             :src="roominfo.queues[0]?.img ?? 'https://dummyimage.com/512x512/fff/000&text=+'"
                             class="max-w-[50px] cursor-pointer  aspect-square object-cover rounded-xl">
-                        <button v-if="roominfo.queues[0]" @click="fav(roominfo.nowplaying.data.id, 'queues')">
+                        <button v-if="roominfo.queues[0]" @click="fav(roominfo.nowplaying.data)">
                             <i :class="{ 'text-rose-300': favlist.find(e => e.id == roominfo.nowplaying.data.id) }"
                                 class="fas fa-heart"></i>
                         </button>
@@ -428,6 +434,8 @@
 </template>
 
 <script setup>
+
+import { io } from 'socket.io-client'
 const { $swal } = useNuxtApp()
 const swal = $swal.mixin({
     customClass: {
@@ -450,8 +458,6 @@ function showloading() {
 }
 const config = useRuntimeConfig().public;
 const inviteCode = useRoute().query?.code
-
-import { io } from 'socket.io-client'
 const connected = ref(false)
 const socket = ref(null);
 
@@ -480,7 +486,7 @@ async function search() {
         if (!searchinput.value.length) return searchlist.value = []
         const { data } = await useFetch(config.api + "/search?q=" + searchinput.value)
         searchlist.value = data.value.data
-    }, 300);
+    }, 500);
 }
 
 const audio = ref(null);
@@ -755,18 +761,11 @@ function getFav() {
     return favorite
 }
 
-function fav(id, type) {
+function fav(data) {
     let favorite = getFav();
 
-    let data;
-    if (type == 'search') {
-        data = searchlist.value.find(e => e.id == id)
-    } else {
-        data = roominfo.value.queues.find(e => e.id == id)
-    }
-
-    if (favorite.find(e => e.id == id)) {
-        favorite = favorite.filter(e => e.id != id)
+    if (favorite.find(e => e.id == data.id)) {
+        favorite = favorite.filter(e => e.id != data.id)
     } else {
         favorite.push(data)
     }
