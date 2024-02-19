@@ -9,6 +9,8 @@ Spotify alt webui for playing song sync with your friends!
 - Sync song with your friends
 - Queues
 - Room Config
+- ChatRoom
+- Playlist (mobile not stable)
 - Cross platform (mobile not stable)
 
 

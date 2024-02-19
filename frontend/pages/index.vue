@@ -421,7 +421,7 @@
                 </div>
             </div>
         </div>
-        <div class="fixed w-[calc(100%-5px)] bottom-0 p-4">
+        <div class="fixed w-full bottom-0 p-4">
             <!-- playerController -->
             <div :class="{ 'h-[0px] -mb-3': !toggleController, 'h-[30px] mb-2': toggleController }"
                 class=" flex items-center justify-center text-center overflow-clip transition-all duration-200">
