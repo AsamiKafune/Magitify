@@ -1,4 +1,66 @@
 <template>
+    <div v-if="toggleAddToPlaylist"
+        class="fixed top-0 left-0 z-[120] w-full min-h-[calc(100dvh)] flex justify-center items-center bg-black/50 backdrop-blur-sm">
+        <div class="bg-black/90 rounded-xl p-4 min-w-[300px]">
+            <div class="flex gap-2 justify-between">
+                <div>
+                    <h1 class="items-center flex text-xl">
+                        เลือกเพลย์ลิส
+                    </h1>
+                    <p class="text-xs opacity-50">
+                        เลือก Playlist ที่ต้องการจะเพิ่ม
+                    </p>
+                </div>
+                <button @click="(() => { toggleAddToPlaylist = false; })"
+                    class="flex items-center justify-center bg-white/10 w-[35px] h-[35px] rounded-lg text-xl text-white">
+                    <i class="fas fa-times md:text-base"></i>
+                </button>
+            </div>
+            <div class="grid gap-2 mt-4 max-h-[200px] overflow-y-scroll rounded-b-xl">
+                <button @click="fav(item.name, tempfav)" class="w-[260px] mx-auto" v-for="item in favlist">
+                    <div class="text-start px-2 py-1 bg-white/10 rounded-md truncate">
+                        {{ item.name }}
+                    </div>
+                </button>
+                <button v-if="!favlist.length" @click="toggleCreatePlaylist = true; toggleAddToPlaylist = false;" class="w-[260px] mx-auto">
+                    <div class="text-start px-2 py-1 flex items-center gap-2 bg-white/10 rounded-md truncate">
+                        <i class="fas fa-plus text-xs"></i> <div class="mb-0.5">สร้างเพลย์ลิส!</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div v-if="toggleCreatePlaylist"
+        class="fixed top-0 left-0 z-[120] w-full min-h-[calc(100dvh)] flex justify-center items-center bg-black/50 backdrop-blur-sm">
+        <div class="bg-black/90 rounded-xl p-4 min-w-[300px]">
+            <div class="flex gap-2 justify-between">
+                <div>
+                    <h1 class="items-center flex text-xl">
+                        สร้างเพลย์ลิส
+                    </h1>
+                    <p class="text-xs opacity-50">
+                        สร้างเพลย์ลิสสำหรับเก็บเพลง
+                    </p>
+                </div>
+                <button @click="(() => { toggleCreatePlaylist = false; })"
+                    class="flex items-center justify-center bg-white/10 w-[35px] h-[35px] rounded-lg text-xl text-white">
+                    <i class="fas fa-times md:text-base"></i>
+                </button>
+            </div>
+            <div class="grid gap-2 mt-4">
+                <div class="relative">
+                    <p class="absolute left-4 top-2 text-white/40 text-xs pointer-events-none">ชื่อเพลย์ลิส
+                    </p>
+                    <input type="text" v-model="playlistname"
+                        class="w-full bg-white/10 pt-5 pb-2 px-4 rounded-xl outline-none">
+                </div>
+                <button @click="createPlaylist"
+                    class="transition-all active:scale-95 hover:bg-white/90 bg-white text-black py-2 rounded-xl">
+                    สร้าง
+                </button>
+            </div>
+        </div>
+    </div>
     <div v-if="toggleCreateRoom"
         class="fixed top-0 left-0 z-40 w-full min-h-[calc(100dvh)] flex justify-center items-center bg-black/50 backdrop-blur-sm">
         <div class="bg-black/90 rounded-xl p-4 min-w-[300px]">
@@ -192,9 +254,8 @@
                             <div
                                 class="flex gap-3 absolute bg-black/60 backdrop-blur-sm top-[-40px] right-0 px-3 py-0.5 rounded-s-xl z-10">
                                 <button class="transition-all active:scale-90 hover:opacity-85"
-                                    @click="fav(item)">
-                                    <i :class="{ 'text-rose-300': favlist.find(e => e.id == item.id) }"
-                                        class="fas fa-thumbs-up text-xl"></i>
+                                    @click="(() => { toggleAddToPlaylist = true; tempfav = item })">
+                                    <i class="fas fa-heart text-xl"></i>
                                 </button>
                                 <button class="transition-all active:scale-90 hover:opacity-85" @click="addtoQueue(item)">
                                     <i class="fas fa-plus text-xl"></i>
@@ -215,8 +276,8 @@
             </div>
         </div>
     </div>
-    <div class="min-h-[calc(100dvh)]">
-        <div class="min-h-[calc(100dvh)] w-full flex">
+    <div class="max-h-[calc(100dvh)]">
+        <div class="max-h-[calc(100dvh)] w-full flex">
             <div
                 class="flex justify-center items-center opacity-30 pointer-events-none min-h-[calc(100dvh)] w-full fixed z-[-1]">
                 <div class="text-center">
@@ -228,7 +289,31 @@
                     </p>
                 </div>
             </div>
-            <div class="p-3 bg-zinc-950/90 w-full pb-[100px]">
+            <!-- <div :class="{ 'w-[250px]': toggleSidebar, 'w-[0px]': !toggleSidebar }"> -->
+            <div class="w-[0px] md:w-[250px] overflow-clip">
+                <div class="flex flex-col gap-2 p-4">
+                    <div class=" flex justify-between">
+                        <div>
+                            <i class="fas fa-book-open"></i> Your Library
+                        </div>
+                        <button @click="toggleCreatePlaylist = true">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <hr class="mx-auto w-[60px] my-2 opacity-30">
+                    <div :class="{ 'bg-white/20': selectPlaylist == item.name }"
+                        class="w-full flex justify-between bg-white/10 rounded-md p-2" v-for="item in  favlist ">
+                        <button @click="selectPlaylist = item.name" class="w-full text-sm text-start truncate">
+                            {{ item.name }}
+                        </button>
+                        <button @click="delplaylist(item.name)" class="w-[30px] text-end">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- <div :class="{ 'w-[calc(100svw-250px)]': toggleSidebar, 'w-[100svw]': !toggleSidebar }"> -->
+            <div class="w-[calc(100svw)] md:w-[calc(100svw-250px)] p-4 h-[calc(100dvh)] overflow-y-scroll pb-[100px]">
                 <!-- listmusic -->
                 <div class="flex mx-auto max-w-xs">
                     <button :disabled="isJoin && !isHost && !roominfo.canRequest"
@@ -248,7 +333,7 @@
                         </p>
                     </div>
                     <div class="rounded-lg pb-2 flex gap-2 overflow-x-auto max-w-full max-h-[120px]">
-                        <div v-for="item, idx in roominfo.queues">
+                        <div v-for=" item, idx  in  roominfo.queues ">
                             <div :class="{ 'border border-purple-400': idx == 0 }"
                                 class="bg-zinc-900 rounded-md overflow-clip flex w-[350px] relative shadow-lg">
                                 <div v-if="(idx > 0) && ((isJoin && roominfo.canRequest) || isHost || !isJoin)"
@@ -258,9 +343,8 @@
                                         <i class="fas fa-play"></i>
                                     </button>
                                     <button class="text-white hover:text-white/80 transition-all active:scale-75"
-                                        @click="fav(item)">
-                                        <i :class="{ 'text-rose-300': favlist.find(e => e.id == item.id) }"
-                                            class="fas fa-heart"></i>
+                                        @click="(() => { toggleAddToPlaylist = true; tempfav = item })">
+                                        <i class="fas fa-heart"></i>
                                     </button>
                                     <button class="text-white hover:text-white/80 transition-all active:scale-75"
                                         @click="removeQueue(item.id)">
@@ -291,40 +375,44 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="favlist.length && toggleSearch == false">
+                <div v-if="favlist.find(e => e.name == selectPlaylist) && toggleSearch == false">
                     <div class="mt-4 mb-2 gap-2 flex items-center">
-                        <i class="fas fa-heart"></i>
                         <p>
-                            รายการโปรด ({{ favlist.length }})
+                            เพลย์ลิส {{ favlist.find(e => e.name == selectPlaylist).name }} ({{ JSON.parse(favlist.find(e =>
+                                e.name == selectPlaylist).data).length }})
                         </p>
                     </div>
-                    <div
-                        class="rounded-lg pb-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-                        <div v-for="item in favlist">
-                            <div class="bg-zinc-900 shadow-lg rounded-md overflow-clip relative w-full">
-                                <img :src="item?.img" class="aspect-video object-cover pointer-events-none" alt="thumbnail">
-                                <div class="text-start p-3 relative">
-                                    <div
-                                        class="flex gap-3 absolute bg-black/60 backdrop-blur-sm top-[-43px] right-0 px-3 py-1 rounded-s-xl ">
-                                        <button v-if="((isJoin && roominfo.canRequest) || isHost || !isJoin)"
-                                            @click="addtoQueue(item)">
-                                            <i class="fas fa-plus text-xl"></i>
-                                        </button>
-                                        <button @click="fav(item)">
-                                            <i class="fas fa-trash text-xl"></i>
-                                        </button>
-                                    </div>
-                                    <p class="truncate">
-                                        {{ item?.title }}
-                                    </p>
-                                    <div class="text-xs opacity-50 truncate">
-                                        {{ item?.author.name }}
-                                    </div>
-                                    <div class="text-xs opacity-50 truncate">
-                                        {{ item?.long }}
+                    <div class="rounded-lg pb-2 grid gap-2">
+                        <div v-for=" item  in  JSON.parse(favlist.find(e => e.name == selectPlaylist).data) ">
+                            <div class="bg-white/5 gap-2 pr-5 rounded-xl overflow-clip flex justify-between shadow-lg">
+                                <div class="flex">
+                                    <img :src="item.img" class="aspect-square object-cover object-center rounded-e-md"
+                                        width="60" alt="thumbnail">
+                                    <div class="text-start p-3 text-xs w-[calc(60svw-20px)]">
+                                        <p class="truncate">
+                                            {{ item.title }}
+                                        </p>
+                                        <div class="truncate ext-sm opacity-50">
+                                            {{ item.author.name }}
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="flex justify-end gap-5">
+                                    <button class="text-white hover:text-white/80 transition-all active:scale-75"
+                                        v-if="(isJoin && isHost) || !isJoin" @click="addtoQueue(item)">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button class="text-white hover:text-white/80 transition-all active:scale-75"
+                                        v-if="(isJoin && isHost) || !isJoin"
+                                        @click="delfromplaylist(selectPlaylist, item.id)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
+                        </div>
+                        <div class="text-xl text-red-400 -mt-2 font-bold"
+                            v-if="!JSON.parse(favlist.find(e => e.name == selectPlaylist).data).length">
+                            #ไม่มีเพลงในเพลย์ลิสนี้!
                         </div>
                     </div>
                 </div>
@@ -333,7 +421,7 @@
                 </div>
             </div>
         </div>
-        <div class="fixed w-full bottom-0 p-4">
+        <div class="fixed w-[calc(100%-5px)] bottom-0 p-4">
             <!-- playerController -->
             <div :class="{ 'h-[0px] -mb-3': !toggleController, 'h-[30px] mb-2': toggleController }"
                 class=" flex items-center justify-center text-center overflow-clip transition-all duration-200">
@@ -377,9 +465,8 @@
                         <img @click="toggleController = !toggleController"
                             :src="roominfo.queues[0]?.img ?? 'https://dummyimage.com/512x512/fff/000&text=+'"
                             class="max-w-[50px] cursor-pointer  aspect-square object-cover rounded-xl">
-                        <button v-if="roominfo.queues[0]" @click="fav(roominfo.nowplaying.data)">
-                            <i :class="{ 'text-rose-300': favlist.find(e => e.id == roominfo.nowplaying.data.id) }"
-                                class="fas fa-heart"></i>
+                        <button v-if="roominfo.queues[0]" @click="(() => { toggleAddToPlaylist = true; tempfav = roominfo.queues[0] })">
+                            <i class="fas fa-heart"></i>
                         </button>
                         <div @click="toggleController = !toggleController"
                             class="text-start cursor-pointer  max-w-[120px] sm:max-w-[390px]">
@@ -461,6 +548,10 @@ const inviteCode = useRoute().query?.code
 const connected = ref(false)
 const socket = ref(null);
 
+const toggleAddToPlaylist = ref(false);
+const toggleCreatePlaylist = ref(false);
+const selectPlaylist = ref("");
+const toggleSidebar = ref(true);
 const toggleChat = ref(false);
 const toggleController = ref(false);
 const toggleRoomDetail = ref(false);
@@ -744,33 +835,101 @@ async function join() {
     socket.value.emit('join', { invitecode: roomInputId.value, name: nickname.value });
 }
 
-//fav
+//playlist (fav, etc)
 setTimeout(() => {
     updateFav()
+    if (favlist.value[0]) selectPlaylist.value = favlist.value[0].name
 }, 100);
 
 function updateFav() {
     favlist.value = getFav()
 }
 
+function delplaylist(name) {
+    localStorage.removeItem(name)
+    updateFav()
+}
+
+function delfromplaylist(playlistname, id) {
+    let favorite;
+    try {
+        favorite = JSON.parse(localStorage.getItem(playlistname))
+    } catch (error) {
+        favorite = []
+    }
+    if (!favorite.find(e => e.id == id)) {
+        return swal.fire({
+            html: "<div><h1 class='text-3xl font-bold'>ผิดพลาด</h1><p>ไม่พบเพลงใน Playlist!</p></div>",
+            icon: "error",
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true,
+            allowOutsideClick: false,
+            didOpen: (toast) => {
+                toast.onmouseleave = swal.resumeTimer
+            }
+        })
+    } else {
+        favorite = favorite.filter(e => e.id != id)
+    }
+    localStorage.setItem(playlistname, JSON.stringify(favorite))
+    updateFav()
+    selectPlaylist.value = nameplaylist;
+}
+
 function getFav() {
-    let favorite = localStorage.getItem("favorite")
+    let favorite;
+    try {
+        favorite = convertObjectToArray(localStorage)
+    } catch (error) {
+        console.log(error)
+        favorite = []
+    }
     if (!favorite) favorite = []
-    else favorite = JSON.parse(favorite)
 
     return favorite
 }
 
-function fav(data) {
-    let favorite = getFav();
-
+const tempfav = ref();
+function fav(nameplaylist, data) {
+    let favorite;
+    try {
+        favorite = JSON.parse(localStorage.getItem(nameplaylist))
+    } catch (error) {
+        favorite = []
+    }
     if (favorite.find(e => e.id == data.id)) {
-        favorite = favorite.filter(e => e.id != data.id)
+        return swal.fire({
+            html: "<div><h1 class='text-3xl font-bold'>ผิดพลาด</h1><p>เพลย์ลิสนี้มีเพลงนี้อยู่แล้ว!</p></div>",
+            icon: "error",
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true,
+            allowOutsideClick: false,
+            didOpen: (toast) => {
+                toast.onmouseleave = swal.resumeTimer
+            }
+        })
     } else {
         favorite.push(data)
     }
-    localStorage.setItem("favorite", JSON.stringify(favorite))
+    localStorage.setItem(nameplaylist, JSON.stringify(favorite))
     updateFav()
+    toggleAddToPlaylist.value = false;
+    selectPlaylist.value = nameplaylist;
+}
+
+const playlistname = ref("");
+function createPlaylist() {
+    if (!playlistname.value.length) return;
+    const f = getFav();
+    if (!f.find(e => e.name == playlistname.value)) {
+        localStorage.setItem(playlistname.value, JSON.stringify([]))
+        updateFav()
+        toggleCreatePlaylist.value = false;
+        playlistname.value = "";
+    }
+    return;
 }
 
 async function syncmusic() {
@@ -1063,7 +1222,7 @@ async function seek(value) {
     } else roominfo.value.nowplaying.time.current = 0;
 }
 
-//extension
+//utils
 async function recheckfile(id) {
     try {
         const response = await useFetch(config.api + "/music/" + id + '.mp3')
@@ -1120,5 +1279,9 @@ const clip_ = async (text) => {
             }
         })
     }
+}
+
+function convertObjectToArray(inputObject) {
+    return Object.keys(inputObject).map(key => ({ name: key, data: inputObject[key] }));
 }
 </script>
