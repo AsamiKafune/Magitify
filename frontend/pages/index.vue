@@ -13,7 +13,7 @@
                 </div>
                 <button @click="(() => { toggleAddToPlaylist = false; })"
                     class="flex items-center justify-center bg-white/10 w-[35px] h-[35px] rounded-lg text-xl text-white">
-                    <i class="fas fa-times md:text-base"></i>
+                    <i class="fas fa-times lg:text-base"></i>
                 </button>
             </div>
             <div class="grid gap-2 mt-4 max-h-[200px] overflow-y-scroll rounded-b-xl">
@@ -22,9 +22,11 @@
                         {{ item.name }}
                     </div>
                 </button>
-                <button v-if="!favlist.length" @click="toggleCreatePlaylist = true; toggleAddToPlaylist = false;" class="w-[260px] mx-auto">
+                <button v-if="!favlist.length" @click="toggleCreatePlaylist = true; toggleAddToPlaylist = false;"
+                    class="w-[260px] mx-auto">
                     <div class="text-start px-2 py-1 flex items-center gap-2 bg-white/10 rounded-md truncate">
-                        <i class="fas fa-plus text-xs"></i> <div class="mb-0.5">สร้างเพลย์ลิส!</div>
+                        <i class="fas fa-plus text-xs"></i>
+                        <div class="mb-0.5">สร้างเพลย์ลิส!</div>
                     </div>
                 </button>
             </div>
@@ -44,7 +46,7 @@
                 </div>
                 <button @click="(() => { toggleCreatePlaylist = false; })"
                     class="flex items-center justify-center bg-white/10 w-[35px] h-[35px] rounded-lg text-xl text-white">
-                    <i class="fas fa-times md:text-base"></i>
+                    <i class="fas fa-times lg:text-base"></i>
                 </button>
             </div>
             <div class="grid gap-2 mt-4">
@@ -289,10 +291,15 @@
                     </p>
                 </div>
             </div>
-            <!-- <div :class="{ 'w-[250px]': toggleSidebar, 'w-[0px]': !toggleSidebar }"> -->
-            <div class="w-[0px] md:w-[250px] overflow-clip">
-                <div class="flex flex-col gap-2 p-4">
-                    <div class=" flex justify-between">
+            <div :class="{ 'w-[250px]': toggleSidebar, 'w-[0px]': !toggleSidebar }"
+                class="transition-all duration-200 relative max-lg:fixed bg-black/90 backdrop-blur-sm z-[11] lg:z-[10] h-[calc(100dvh)]">
+                <button @click="toggleSidebar = !toggleSidebar"
+                    class="lg:hidden absolute right-[-25px] top-[calc(50dvh)] translate-y-[-50%] bg-zinc-800 outline-none backdrop-blur-sm rounded-lg px-1.5 py-4">
+                    <i :class="{ 'rotate-180': toggleSidebar }" class="fas fa-caret-right"></i>
+                </button>
+                <div class="flex flex-col gap-2 overflow-clip transition-all"
+                    :class="{ 'w-[250px]': toggleSidebar, 'w-[0px]': !toggleSidebar }">
+                    <div class=" flex justify-between p-4">
                         <div>
                             <i class="fas fa-book-open"></i> Your Library
                         </div>
@@ -301,19 +308,20 @@
                         </button>
                     </div>
                     <hr class="mx-auto w-[60px] my-2 opacity-30">
-                    <div :class="{ 'bg-white/20': selectPlaylist == item.name }"
-                        class="w-full flex justify-between bg-white/10 rounded-md p-2" v-for="item in  favlist ">
-                        <button @click="selectPlaylist = item.name" class="w-full text-sm text-start truncate">
-                            {{ item.name }}
-                        </button>
-                        <button @click="delplaylist(item.name)" class="w-[30px] text-end">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                    <div class="px-4 pb-5 lg:pb-28 flex flex-col gap-2 h-[calc(100dvh-85px)] overflow-y-auto">
+                        <div :class="{ 'bg-white/20': selectPlaylist == item.name }"
+                            class="w-full flex justify-between bg-white/10 rounded-md" v-for="item in  favlist ">
+                            <button @click="selectPlaylist = item.name" class="w-full text-sm text-start truncate p-2">
+                                {{ item.name }}
+                            </button>
+                            <button @click="delplaylist(item.name)" class="w-[30px] text-end p-2">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-            <!-- <div :class="{ 'w-[calc(100svw-250px)]': toggleSidebar, 'w-[100svw]': !toggleSidebar }"> -->
-            <div class="w-[calc(100svw)] md:w-[calc(100svw-250px)] p-4 h-[calc(100dvh)] overflow-y-scroll pb-[100px]">
+            <div class="w-[calc(100svw)] lg:w-[calc(100svw-250px)] p-4 h-[calc(100dvh)] overflow-y-scroll pb-[100px]">
                 <!-- listmusic -->
                 <div class="flex mx-auto max-w-xs">
                     <button :disabled="isJoin && !isHost && !roominfo.canRequest"
@@ -383,10 +391,16 @@
                         </p>
                     </div>
                     <div class="rounded-lg pb-2 grid gap-2">
-                        <div v-for=" item  in  JSON.parse(favlist.find(e => e.name == selectPlaylist).data) ">
-                            <div class="bg-white/5 gap-2 pr-5 rounded-xl overflow-clip flex justify-between shadow-lg">
+                        <div v-for="item  in  JSON.parse(favlist.find(e => e.name == selectPlaylist).data) ">
+                            <div :class="{ 'bg-white/[0.11] border border-white/10': item.id == roominfo.nowplaying.data.id }"
+                                class="bg-white/5 backdrop-blur-lg gap-2 pr-5 rounded-xl overflow-clip flex justify-between shadow-lg">
                                 <div class="flex">
-                                    <img :src="item.img" class="aspect-square object-cover object-center rounded-e-md"
+                                    <button
+                                        class="text-white min-w-[50px] hover:text-white/80 transition-all active:scale-75"
+                                        v-if="(isJoin && isHost) || !isJoin" @click="addtoQueue(item)">
+                                        <i class="fas fa-play text-md"></i>
+                                    </button>
+                                    <img :src="item.img" class="aspect-square object-cover object-center rounded-md"
                                         width="60" alt="thumbnail">
                                     <div class="text-start p-3 text-xs w-[calc(60svw-20px)]">
                                         <p class="truncate">
@@ -398,10 +412,6 @@
                                     </div>
                                 </div>
                                 <div class="flex justify-end gap-5">
-                                    <button class="text-white hover:text-white/80 transition-all active:scale-75"
-                                        v-if="(isJoin && isHost) || !isJoin" @click="addtoQueue(item)">
-                                        <i class="fas fa-play"></i>
-                                    </button>
                                     <button class="text-white hover:text-white/80 transition-all active:scale-75"
                                         v-if="(isJoin && isHost) || !isJoin"
                                         @click="delfromplaylist(selectPlaylist, item.id)">
@@ -421,7 +431,7 @@
                 </div>
             </div>
         </div>
-        <div class="fixed w-full bottom-0 p-4">
+        <div class="fixed z-10 w-full bottom-0 p-4">
             <!-- playerController -->
             <div :class="{ 'h-[0px] -mb-3': !toggleController, 'h-[30px] mb-2': toggleController }"
                 class=" flex items-center justify-center text-center overflow-clip transition-all duration-200">
@@ -465,7 +475,8 @@
                         <img @click="toggleController = !toggleController"
                             :src="roominfo.queues[0]?.img ?? 'https://dummyimage.com/512x512/fff/000&text=+'"
                             class="max-w-[50px] cursor-pointer  aspect-square object-cover rounded-xl">
-                        <button v-if="roominfo.queues[0]" @click="(() => { toggleAddToPlaylist = true; tempfav = roominfo.queues[0] })">
+                        <button v-if="roominfo.queues[0]"
+                            @click="(() => { toggleAddToPlaylist = true; tempfav = roominfo.queues[0] })">
                             <i class="fas fa-heart"></i>
                         </button>
                         <div @click="toggleController = !toggleController"
@@ -551,7 +562,6 @@ const socket = ref(null);
 const toggleAddToPlaylist = ref(false);
 const toggleCreatePlaylist = ref(false);
 const selectPlaylist = ref("");
-const toggleSidebar = ref(true);
 const toggleChat = ref(false);
 const toggleController = ref(false);
 const toggleRoomDetail = ref(false);
@@ -611,7 +621,14 @@ const room_url = () => {
     return window.location.origin + '?code=' + roominfo.value.id
 }
 
+const toggleSidebar = ref(window.innerWidth >= 1024);
+const handleResize = () => {
+    toggleSidebar.value = window.innerWidth >= 1024;
+};
+watch(() => window.innerWidth, handleResize);
+
 onMounted(() => {
+    window.addEventListener('resize', handleResize);
     const server = io(config.api)
     server.on('connect', () => {
         connected.value = server.connected;
