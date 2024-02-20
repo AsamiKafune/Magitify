@@ -344,17 +344,16 @@
                         <div v-for=" item, idx  in  roominfo.queues ">
                             <div :class="{ 'border border-purple-400': idx == 0 }"
                                 class="bg-zinc-900 rounded-md overflow-clip flex w-[350px] relative shadow-lg">
-                                <div v-if="(idx > 0) && ((isJoin && roominfo.canRequest) || isHost || !isJoin)"
-                                    class="absolute flex gap-2 bottom-2 bg-black/60 backdrop-blur-sm rounded-r-xl pr-3 ps-2 py-1">
+                                <div class="absolute flex gap-2 bottom-2 bg-black/60 backdrop-blur-sm rounded-r-xl pr-3 ps-2 py-1">
                                     <button class="text-white hover:text-white/80 transition-all active:scale-75"
                                         v-if="(isJoin && isHost) || !isJoin" @click="forcePlay(item.id)">
                                         <i class="fas fa-play"></i>
                                     </button>
-                                    <button class="text-white hover:text-white/80 transition-all active:scale-75"
+                                    <button v-if="(idx > 0)" class="text-white hover:text-white/80 transition-all active:scale-75"
                                         @click="(() => { toggleAddToPlaylist = true; tempfav = item })">
                                         <i class="fas fa-heart"></i>
                                     </button>
-                                    <button class="text-white hover:text-white/80 transition-all active:scale-75"
+                                    <button v-if="(idx > 0) && ((isJoin && roominfo.canRequest) || isHost || !isJoin)" class="text-white hover:text-white/80 transition-all active:scale-75"
                                         @click="removeQueue(item.id)">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -397,7 +396,7 @@
                                 <div class="flex">
                                     <button
                                         class="text-white min-w-[50px] hover:text-white/80 transition-all active:scale-75"
-                                        v-if="(isJoin && isHost) || !isJoin" @click="addtoQueue(item)">
+                                        v-if="(isJoin && isHost) || !isJoin || (roominfo.canRequest && isJoin && !isHost)" @click="addtoQueue(item)">
                                         <i class="fas fa-play text-md"></i>
                                     </button>
                                     <img :src="item.img" class="aspect-square object-cover object-center rounded-md"
@@ -413,7 +412,6 @@
                                 </div>
                                 <div class="flex justify-end gap-5">
                                     <button class="text-white hover:text-white/80 transition-all active:scale-75"
-                                        v-if="(isJoin && isHost) || !isJoin"
                                         @click="delfromplaylist(selectPlaylist, item.id)">
                                         <i class="fas fa-trash"></i>
                                     </button>
