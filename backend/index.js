@@ -159,6 +159,15 @@ fastify.post("/getsong", async (req, res) => {
     return await cacheSong(song)
 })
 
+fastify.get("/allchannel", async (req, res) => {
+    return res.send({ code: 1, data: channel.map(e => {
+        return {
+            invitecode: e.invitecode,
+            users: e.users.length
+        }
+    }) })
+})
+
 fastify.listen({ port: 3011, host: "0.0.0.0" })
     .then(() => console.log("Magitify WebApi - Coding by Kafune Ch. | server has running!"))
 
@@ -166,117 +175,99 @@ function cacheSong(song) {
     return new Promise(async (resolve, reject) => {
         const _library = getsongLibrary()
         const find_song = _library.find(e => e.id == song.id)
-
+        let filePath = path.join(process.cwd(), 'music/' + song.id + '.mp3')
         if (find_song) {
             const cachesong = fs.readdirSync(path.join(process.cwd(), 'music'))
             if (cachesong.find(e => e == song.id + ".mp3")) {
+                fs.stat(filePath, (err, stats) => {
+                    if (err) {
+                      console.error(err);
+                      return;
+                    }
+                  
+                    const fileSize = stats.size;
+                  
+                    if (fileSize <= 0) {
+                      // ลบไฟล์
+                      fs.unlink(filePath, (err) => {
+                        if (err) {
+                          console.error(err);
+                          return;
+                        }
+                  
+                        console.log("File deleted successfully!");
+                      });
+                    } else {
+                      console.log("File size is not 0 bytes.");
+                    }
+                  });
                 resolve({
                     code: 1,
                     data: find_song
                 })
             } else {
-
                 console.log("file got broke redownload... wait a moment")
 
                 let _temp = getsongLibrary()
                 _temp = _temp.filter(e => e.id != song.id)
                 fs.writeFileSync(path.join(process.cwd(), "library.json"), JSON.stringify(_temp))
-
-                _temp.push({
-                    "canplay": false,
-                    title: song.title,
-                    url: song.url,
-                    id: song.id
-                })
-                fs.writeFileSync(path.join(process.cwd(), "library.json"), JSON.stringify(_temp))
-
-                const _vid = ytdl(song.url, {
-                    quality: '140',
-                    filter: format => format.container === 'mp4'
-                })
-
-                _vid.on('progress', (chunkLength, received, total) => {
-                    const percent = (received / total) * 100;
-                    console.log(`[WARN] Cache ${song.title}: ${percent.toFixed(2)}%`);
-                });
-
-                _vid.pipe(fs.createWriteStream(path.join(process.cwd(), 'music/' + song.id + '.mp3')))
-                    .on('finish', () => {
-                        const editLibrary = getsongLibrary()
-                        const _rawData = editLibrary.find(e => e.id == song.id)
-                        if (_rawData) {
-                            _rawData.canplay = true
-                            fs.writeFileSync(path.join(process.cwd(), "library.json"), JSON.stringify(editLibrary))
-
-                            resolve({
-                                code: 1,
-                                data: _rawData
-                            });
-                        } else {
-                            console.log("error can't find")
-                            reject({
-                                code: 0,
-                                error: "can't find"
-                            })
-                        }
-                    })
-                    .on('error', (err) => {
-                        console.error(`Error cache: ${song.title}:`, err);
-                        reject({
-                            code: 0,
-                            error: `Error cache: ${song.title}`,
-                        });
-                    });
+                return resolve(await syncmusic(_temp, song))
             }
         } else {
             let _temp = getsongLibrary()
-            _temp.push({
-                "canplay": false,
-                title: song.title,
-                url: song.url,
-                id: song.id
-            })
-            fs.writeFileSync(path.join(process.cwd(), "library.json"), JSON.stringify(_temp))
-
-            const _vid = ytdl(song.url, {
-                quality: '140',
-                filter: format => format.container === 'mp4'
-            })
-
-            _vid.on('progress', (chunkLength, received, total) => {
-                const percent = (received / total) * 100;
-                console.log(`[WARN] Cache ${song.title}: ${percent.toFixed(2)}%`);
-            });
-
-            _vid.pipe(fs.createWriteStream(path.join(process.cwd(), 'music/' + song.id + '.mp3')))
-                .on('finish', () => {
-                    const editLibrary = getsongLibrary()
-                    const _rawData = editLibrary.find(e => e.id == song.id)
-                    if (_rawData) {
-                        _rawData.canplay = true
-                        fs.writeFileSync(path.join(process.cwd(), "library.json"), JSON.stringify(editLibrary))
-
-                        resolve({
-                            code: 1,
-                            data: _rawData
-                        });
-                    } else {
-                        console.log("error can't find")
-                        reject({
-                            code: 0,
-                            error: "can't find"
-                        })
-                    }
-                })
-                .on('error', (err) => {
-                    console.error(`Error cache: ${song.title}:`, err);
-                    reject({
-                        code: 0,
-                        error: `Error cache: ${song.title}`,
-                    });
-                });
+            return resolve(await syncmusic(_temp, song))
         }
     });
+}
+
+function syncmusic(_temp, song) {
+    return new Promise((resolve, reject) => {
+        _temp.push({
+            "canplay": false,
+            title: song.title,
+            url: song.url,
+            id: song.id
+        })
+        fs.writeFileSync(path.join(process.cwd(), "library.json"), JSON.stringify(_temp))
+    
+        const _vid = ytdl(song.url, {
+            quality: '140',
+            filter: format => format.container === 'mp4'
+        })
+    
+        _vid.on('progress', (chunkLength, received, total) => {
+            const percent = (received / total) * 100;
+            console.log(`[WARN] Cache ${song.title}: ${percent.toFixed(2)}%`);
+        });
+    
+        _vid.pipe(fs.createWriteStream(path.join(process.cwd(), 'music/' + song.id + '.mp3')))
+            .on('finish', () => {
+                const editLibrary = getsongLibrary()
+                const _rawData = editLibrary.find(e => e.id == song.id)
+                if (_rawData) {
+                    _rawData.canplay = true
+                    fs.writeFileSync(path.join(process.cwd(), "library.json"), JSON.stringify(editLibrary))
+    
+                    return resolve({
+                        code: 1,
+                        data: _rawData
+                    })
+                } else {
+                    console.log("error can't find")
+                    return resolve({
+                        code: 0,
+                        error: "can't find"
+                    })
+                }
+            })
+            .on('error', (err) => {
+                console.error(`Error cache: ${song.title}:`, err);
+                return resolve({
+                    code: 0,
+                    error: `Error cache: ${song.title}`,
+                })
+            });
+    })
 }
 
 function getsongLibrary() {
@@ -312,7 +303,6 @@ function convertTime(value) {
 
 process.on('unhandledRejection', (reason, p) => {
 })
-
 process.on("uncaughtException", (err, origin) => {
     console.log('=== uncaught Exception ==='.toUpperCase());
     console.log('Origin: ', origin, 'Exception: ', err.stack ? err.stack : err)
