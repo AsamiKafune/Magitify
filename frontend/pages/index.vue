@@ -32,6 +32,45 @@
             </div>
         </div>
     </div>
+    <div v-if="toggleSearchRoom"
+        class="fixed top-0 left-0 z-[120] w-full min-h-[calc(100dvh)] flex justify-center items-center bg-black/50 backdrop-blur-sm">
+        <div class="bg-black/90 rounded-xl p-4 min-w-[300px]">
+            <div class="flex gap-2 justify-between">
+                <div>
+                    <h1 class="items-center flex text-xl">
+                        ห้องฟังเพลงที่ออนไลน์
+                    </h1>
+                    <p class="text-xs opacity-50">
+                        ห้องทั้งหมดตอนนี้ ({{ roomlist.length }}) ห้อง
+                    </p>
+                </div>
+                <button @click="(() => { toggleSearchRoom = false; })"
+                    class="flex items-center justify-center bg-white/10 w-[35px] h-[35px] rounded-lg text-xl text-white">
+                    <i class="fas fa-times lg:text-base"></i>
+                </button>
+            </div>
+            <div class="grid gap-2 mt-4 max-h-[200px] overflow-y-scroll rounded-b-xl">
+                <button @click="joinroom(item.invitecode)" class="w-[260px] mx-auto px-2 py-1 bg-white/10 rounded-md" v-for="item in roomlist">
+                    <div class="text-start flex justify-between">
+                        <div class="truncate">
+                            {{ item.roomname }}
+                        </div>
+                        <div class="text-end">
+                            Online: {{ item.users }}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-start text-sm truncate opacity-50">
+                            DJ: {{ item.owner }}
+                        </div>
+                        <div class="text-end text-xs truncate opacity-50">
+                            ID: {{ item.invitecode }}
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
     <div v-if="toggleCreatePlaylist"
         class="fixed top-0 left-0 z-[120] w-full min-h-[calc(100dvh)] flex justify-center items-center bg-black/50 backdrop-blur-sm">
         <div class="bg-black/90 rounded-xl p-4 min-w-[300px]">
@@ -81,11 +120,31 @@
                 </button>
             </div>
             <div class="grid gap-2 mt-4">
-                <div class="relative">
-                    <p class="absolute left-4 top-2 text-white/40 text-xs pointer-events-none">username
-                    </p>
-                    <input type="text" v-model="nickname" class="w-full bg-white/10 pt-5 pb-2 px-4 rounded-xl outline-none">
+
+                <div class="text-xs -mb-1">
+                    ◆ โปรไฟล์
                 </div>
+                <div class="relative">
+                    <p class="absolute left-4 top-2 text-white/40 text-xs pointer-events-none">nickname
+                    </p>
+                    <input type="text" v-model="nickname" maxlength="13"
+                        class="w-full bg-white/10 pt-5 pb-2 px-4 rounded-xl outline-none">
+                </div>
+                <div class="text-xs mt-1 -mb-1">
+                    ◆ ตั้งค่าห้อง
+                </div>
+                <div class="relative">
+                    <p class="absolute left-4 top-2 text-white/40 text-xs pointer-events-none">ชื่อห้อง
+                    </p>
+                    <input type="text" maxlength="16" v-model="roomnameInput"
+                        class="w-full bg-white/10 pt-5 pb-2 px-4 rounded-xl outline-none">
+                </div>
+                <div class="flex gap-2 items-center">
+                    <button @click="hidden_room = !hidden_room"
+                        :class="{ 'bg-white/50': !hidden_room, 'bg-pink-400': hidden_room }" class="rounded-full p-2" />
+                    <p class="text-white/40 text-xs w-full">ซ่อนห้องจาก Public?</p>
+                </div>
+
                 <button @click="host"
                     class="transition-all active:scale-95 hover:bg-white/90 bg-white text-black py-2 rounded-xl">
                     สร้าง
@@ -99,10 +158,10 @@
             <div class="flex gap-2 justify-between">
                 <div>
                     <h1 class="items-center flex text-xl">
-                        ค้นหา
+                        เข้าห้อง
                     </h1>
                     <p class="text-xs opacity-50">
-                        ค้นหาห้องฟังเพลง
+                        เข้าห้องผ่านไอดี
                     </p>
                 </div>
                 <button @click="(() => { toggleJoinRoom = false; })"
@@ -112,7 +171,7 @@
             </div>
             <div class="grid gap-2 mt-2">
                 <div class="relative">
-                    <p class="absolute left-4 top-1 text-xs text-white/40 pointer-events-none">username
+                    <p class="absolute left-4 top-1 text-xs text-white/40 pointer-events-none">nickname
                     </p>
                     <div class="flex bg-white/10 rounded-xl px-3">
                         <input type="text" v-model="nickname" maxlength="13"
@@ -152,7 +211,7 @@
                 </div>
             </div>
             <div class="h-[300px] w-[225px] px-3 py-1.5 mb-1 break-words overflow-y-auto">
-                <div v-for="item in messageList">
+                <div v-for=" item  in  messageList ">
                     <div v-if="item.msgType == '1'" class="ps-4 flex gap-1 my-2 text-sm justify-center w-full">
                         <div class="truncate">
                             {{ item.name }} {{ item.msg }}
@@ -249,7 +308,7 @@
             </div>
             <div
                 class="rounded-lg pb-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:max-h-[90svh] max-h-[85svh] mt-5 overflow-y-auto">
-                <div v-for="item in searchlist">
+                <div v-for=" item  in  searchlist ">
                     <div class="bg-zinc-900 rounded-md overflow-clip relative w-full">
                         <img :src="item.img" class="aspect-video object-cover pointer-events-none" alt="thumbnail">
                         <div class="text-start p-3 relative">
@@ -310,7 +369,7 @@
                     <hr class="mx-auto w-[60px] my-2 opacity-30">
                     <div class="px-4 pb-5 lg:pb-28 flex flex-col gap-2 h-[calc(100dvh-85px)] overflow-y-auto">
                         <div :class="{ 'bg-white/20': selectPlaylist == item.name }"
-                            class="w-full flex justify-between bg-white/10 rounded-md" v-for="item in  favlist ">
+                            class="w-full flex justify-between bg-white/10 rounded-md" v-for=" item  in   favlist  ">
                             <button @click="selectPlaylist = item.name" class="w-full text-sm text-start truncate p-2">
                                 {{ item.name }}
                             </button>
@@ -341,7 +400,7 @@
                         </p>
                     </div>
                     <div class="rounded-lg pb-2 flex gap-2 overflow-x-auto max-w-full max-h-[120px]">
-                        <div v-for=" item, idx  in  roominfo.queues ">
+                        <div v-for="  item, idx   in   roominfo.queues  ">
                             <div :class="{ 'border border-purple-400': idx == 0 }"
                                 class="bg-zinc-900 rounded-md overflow-clip flex w-[350px] relative shadow-lg">
                                 <div
@@ -393,7 +452,7 @@
                         </p>
                     </div>
                     <div class="rounded-lg pb-2 grid gap-2">
-                        <div v-for="item  in  JSON.parse(favlist.find(e => e.name == selectPlaylist).data) ">
+                        <div v-for=" item   in   JSON.parse(favlist.find(e => e.name == selectPlaylist).data)  ">
                             <div :class="{ 'bg-white/[0.11] border border-white/10': item.id == roominfo.nowplaying.data.id }"
                                 class="bg-white/5 backdrop-blur-lg gap-2 pr-5 rounded-xl overflow-clip flex justify-between shadow-lg">
                                 <div class="flex">
@@ -448,8 +507,15 @@
                     <button v-if="!isJoin" @click="(() => { toggleJoinRoom = true; toggleController = false; })"
                         class="text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
                         <div class="flex items-center justify-center text-white rounded-xl">
-                            <i class="fas fa-globe-europe"></i>
+                            <i class="fas fa-globe-asia"></i>
                         </div> เข้าร่วม
+                    </button>
+                    <button v-if="!isJoin"
+                        @click="(() => { toggleSearchRoom = true; toggleController = false; getRoomList() })"
+                        class="text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
+                        <div class="flex items-center justify-center text-white rounded-xl">
+                            <i class="fas fa-search"></i>
+                        </div> ค้นหาห้อง
                     </button>
                     <button @click="toggleRoomDetail = true" v-if="isJoin"
                         class="text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
@@ -561,6 +627,10 @@ const inviteCode = useRoute().query?.code
 const connected = ref(false)
 const socket = ref(null);
 
+const roomnameInput = ref("มาฟังเพลงกัน!");
+const hidden_room = ref(false);
+
+const toggleSearchRoom = ref(false);
 const toggleAddToPlaylist = ref(false);
 const toggleCreatePlaylist = ref(false);
 const selectPlaylist = ref("");
@@ -592,8 +662,21 @@ async function search() {
     }, 500);
 }
 
+
 const audio = ref(null);
 const volume = ref(0.15);
+
+const roomlist = ref([]);
+async function getRoomList() {
+    const { data } = await useFetch(config.api + "/allchannel")
+    if (data.value.code == 1) roomlist.value = data.value.data;
+}
+
+async function joinroom(code) {
+    toggleJoinRoom.value = true;
+    roomInputId.value = code;
+    toggleSearchRoom.value = false;
+}
 
 const nickname = ref("");
 const myid = ref("");
@@ -818,12 +901,12 @@ async function updateChat(msg, title, msgType) {
 //listen toggeter
 async function host() {
     if (!nickname.value.length) return;
+    if (!roomnameInput.value.length) return;
     isHost.value = true;
     isJoin.value = true;
     toggleRoomDetail.value = true;
     toggleCreateRoom.value = false;
-
-    socket.value.emit('create', { invitecode: roominfo.value.id, name: nickname.value, users: roominfo.value.users });
+    socket.value.emit('create', { invitecode: roominfo.value.id, name: nickname.value, roomname: roomnameInput.value, hidden: hidden_room.value, users: roominfo.value.users });
 }
 
 if (inviteCode) {
@@ -851,6 +934,7 @@ async function join() {
     isHost.value = false;
     toggleRoomDetail.value = true;
     toggleJoinRoom.value = false;
+
     socket.value.emit('join', { invitecode: roomInputId.value, name: nickname.value });
 }
 
@@ -913,7 +997,7 @@ function getFav() {
                 data: e.data
             })
         } catch (error) {
-            console.log("Error:",error)
+            console.log("Error:", error)
         }
     })
     return f_fav
