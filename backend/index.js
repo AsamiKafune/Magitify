@@ -41,9 +41,11 @@ io.on('connection', (socket) => {
 
         if (!channel.find(e => e.invitecode == data.invitecode)) {
             channel.push({
+                roomname: data.roomname,
                 invitecode: data.invitecode,
                 owner: socket.id,
-                users: data.users
+                users: data.users,
+                hidden: data.hidden??false
             })
             io.sockets.in(data.invitecode)
                 .emit('create_info', { yourid: socket.id });
@@ -160,12 +162,16 @@ fastify.post("/getsong", async (req, res) => {
 })
 
 fastify.get("/allchannel", async (req, res) => {
-    return res.send({ code: 1, data: channel.map(e => {
-        return {
-            invitecode: e.invitecode,
-            users: e.users.length
-        }
-    }) })
+    return res.send({
+        code: 1, data: (channel.filter(e => e.hidden == false)).map(e => {
+            return {
+                roomname: e.roomname,
+                invitecode: e.invitecode,
+                users: e.users.length,
+                owner: e.users.find(x => x.isOwner == true).name
+            }
+        })
+    })
 })
 
 fastify.listen({ port: 3011, host: "0.0.0.0" })
@@ -181,26 +187,26 @@ function cacheSong(song) {
             if (cachesong.find(e => e == song.id + ".mp3")) {
                 fs.stat(filePath, (err, stats) => {
                     if (err) {
-                      console.error(err);
-                      return;
+                        console.error(err);
+                        return;
                     }
-                  
                     const fileSize = stats.size;
-                  
+
                     if (fileSize <= 0) {
-                      // ลบไฟล์
-                      fs.unlink(filePath, (err) => {
-                        if (err) {
-                          console.error(err);
-                          return;
-                        }
-                  
-                        console.log("File deleted successfully!");
-                      });
-                    } else {
-                      console.log("File size is not 0 bytes.");
+                        // ลบไฟล์
+                        fs.unlink(filePath, (err) => {
+                            if (err) {
+                                console.error(err);
+                                return reject({
+                                    code: 0,
+                                    error: "File not found."
+                                })
+                            }
+
+                            console.log("File deleted successfully!");
+                        });
                     }
-                  });
+                });
                 resolve({
                     code: 1,
                     data: find_song
@@ -211,16 +217,16 @@ function cacheSong(song) {
                 let _temp = getsongLibrary()
                 _temp = _temp.filter(e => e.id != song.id)
                 fs.writeFileSync(path.join(process.cwd(), "library.json"), JSON.stringify(_temp))
-                return resolve(await syncmusic(_temp, song))
+                return resolve(await download_music(_temp, song))
             }
         } else {
             let _temp = getsongLibrary()
-            return resolve(await syncmusic(_temp, song))
+            return resolve(await download_music(_temp, song))
         }
     });
 }
 
-function syncmusic(_temp, song) {
+function download_music(_temp, song) {
     return new Promise((resolve, reject) => {
         _temp.push({
             "canplay": false,
@@ -229,17 +235,17 @@ function syncmusic(_temp, song) {
             id: song.id
         })
         fs.writeFileSync(path.join(process.cwd(), "library.json"), JSON.stringify(_temp))
-    
+
         const _vid = ytdl(song.url, {
             quality: '140',
             filter: format => format.container === 'mp4'
         })
-    
+
         _vid.on('progress', (chunkLength, received, total) => {
             const percent = (received / total) * 100;
             console.log(`[WARN] Cache ${song.title}: ${percent.toFixed(2)}%`);
         });
-    
+
         _vid.pipe(fs.createWriteStream(path.join(process.cwd(), 'music/' + song.id + '.mp3')))
             .on('finish', () => {
                 const editLibrary = getsongLibrary()
@@ -247,24 +253,24 @@ function syncmusic(_temp, song) {
                 if (_rawData) {
                     _rawData.canplay = true
                     fs.writeFileSync(path.join(process.cwd(), "library.json"), JSON.stringify(editLibrary))
-    
+
                     return resolve({
                         code: 1,
                         data: _rawData
                     })
                 } else {
-                    console.log("error can't find")
-                    return resolve({
+                    console.log("Music in library is null!")
+                    return reject({
                         code: 0,
-                        error: "can't find"
+                        error: "File not found."
                     })
                 }
             })
             .on('error', (err) => {
                 console.error(`Error cache: ${song.title}:`, err);
-                return resolve({
+                return reject({
                     code: 0,
-                    error: `Error cache: ${song.title}`,
+                    error: `Server cannot cache: ${song.title}`,
                 })
             });
     })
