@@ -492,7 +492,7 @@
                 </div>
             </div>
         </div>
-        <div class="fixed z-10 w-full bottom-0 p-4">
+        <div class="fixed z-10 w-full sm:w-fit sm:min-w-[600px] bottom-0 p-4 mx-auto translate-x-[-50%] left-[50vw]">
             <!-- playerController -->
             <div :class="{ 'h-[0px] -mb-3': !toggleController, 'h-[30px] mb-2': toggleController }"
                 class=" flex items-center justify-center text-center overflow-clip transition-all duration-200">
