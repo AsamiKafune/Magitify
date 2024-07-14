@@ -385,7 +385,7 @@
                     </div>
                 </div>
             </div>
-            <div class="w-[calc(100svw)] lg:w-[calc(100svw-250px)] p-4 h-[calc(100dvh)] overflow-y-scroll pb-[100px]">
+            <div class="w-[calc(100svw)] lg:w-[calc(100svw-250px)] p-4 h-[calc(100dvh)] overflow-y-scroll pb-[150px]">
                 <!-- listmusic -->
                 <div class="flex mx-auto max-w-xs">
                     <button :disabled="isJoin && !isHost && !roominfo.canRequest"
@@ -498,46 +498,51 @@
                 </div>
             </div>
         </div>
-        <div class="fixed z-10 w-full sm:w-fit sm:min-w-[600px] bottom-0 p-4 mx-auto translate-x-[-50%] left-[50vw]">
+        <div
+            class="fixed z-10 w-full sm:w-fit sm:min-w-[600px] bottom-0 px-4 pb-4 mx-auto translate-x-[-50%] left-[50vw]">
             <!-- playerController -->
-            <div :class="{ 'h-[0px] -mb-3': !toggleController, 'h-[30px] mb-2': toggleController }"
-                class=" flex items-center justify-center text-center overflow-clip transition-all duration-200">
 
-                <div class="flex gap-2">
-                    <button v-if="!isJoin" @click="(() => { toggleCreateRoom = true; toggleController = false; })"
-                        class="text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
-                        <div class="flex items-center justify-center text-white rounded-xl">
-                            <i class="fas fa-plus"></i>
-                        </div> สร้าง
-                    </button>
-                    <button v-if="!isJoin" @click="(() => { toggleJoinRoom = true; toggleController = false; })"
-                        class="text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
-                        <div class="flex items-center justify-center text-white rounded-xl">
-                            <i class="fas fa-globe-asia"></i>
-                        </div> เข้าร่วม
-                    </button>
-                    <button v-if="!isJoin"
-                        @click="(() => { toggleSearchRoom = true; toggleController = false; getRoomList() })"
-                        class="text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
-                        <div class="flex items-center justify-center text-white rounded-xl">
-                            <i class="fas fa-search"></i>
-                        </div> ค้นหาห้อง
-                    </button>
-                    <button @click="toggleRoomDetail = true" v-if="isJoin"
-                        class="text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
-                        <div class="flex items-center justify-center text-white rounded-xl">
-                            <i class="fas fa-headset"></i>
-                        </div> {{ (isHost && isJoin) ? "ตั้งค่า" : "ข้อมูลห้อง" }}
-                    </button>
-                    <button @click="syncmusic()" v-if="isJoin && !isHost"
-                        class="text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
-                        <div class="flex items-center justify-center text-white rounded-xl">
-                            <i class="fas fa-sync-alt"></i>
-                        </div> Sync
-                    </button>
+            <div class="relative">
+                <div :class="{ 'h-[0px] top-[-0px] -mb-3': !toggleController, 'h-[30px] mb-2  top-[-35px]': toggleController }"
+                    class="absolute z-10 translate-x-[-50%] left-[50%] flex items-center justify-center text-center overflow-clip transition-all duration-200">
+
+                    <div class="flex gap-2">
+                        <button v-if="!isJoin" @click="(() => { toggleCreateRoom = true; toggleController = false; })"
+                            class="w-[85px] text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
+                            <div class="flex items-center justify-center text-white rounded-xl">
+                                <i class="fas fa-plus"></i>
+                            </div> สร้าง
+                        </button>
+                        <button v-if="!isJoin" @click="(() => { toggleJoinRoom = true; toggleController = false; })"
+                            class="w-[100px] text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
+                            <div class="flex items-center justify-center text-white rounded-xl">
+                                <i class="fas fa-globe-asia"></i>
+                            </div> เข้าร่วม
+                        </button>
+                        <button v-if="!isJoin" @click="(() => { toggleSearchRoom = true; toggleController = false; getRoomList() })"
+                            class="w-[120px] text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
+                            <div class="flex items-center justify-center text-white rounded-xl">
+                                <i class="fas fa-search"></i>
+                            </div> ค้นหาห้อง
+                        </button>
+                        <button @click="toggleRoomDetail = true" v-if="isJoin"
+                            class="w-[120px] text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
+                            <div class="flex items-center justify-center text-white rounded-xl">
+                                <i class="fas fa-headset"></i>
+                            </div> {{ (isHost && isJoin) ? "ตั้งค่า" : "ข้อมูลห้อง" }}
+                        </button>
+                        <button @click="syncmusic()" v-if="isJoin && !isHost"
+                            class="w-[120px] text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
+                            <div class="flex items-center justify-center text-white rounded-xl">
+                                <i class="fas fa-sync-alt"></i>
+                            </div> Sync
+                        </button>
+                    </div>
+
                 </div>
-
             </div>
+
+
             <div
                 class="mx-auto max-w-2xl py-3 ps-3 pr-4 backdrop-blur-sm  bg-zinc-900/90 rounded-xl shadow-xl relative overflow-clip">
                 <div :class="{ 'opacity-0': toggleController }"
@@ -1318,14 +1323,15 @@ function playAudio(pos) {
     } else {
         audio.startTime = AudioContext.currentTime;
     }
-    audio.source.start(0, audio.pausedAt);
-
     audio.isPlaying = true
     roominfo.value.isPlaying = true
+
+    audio.source.start(0, audio.pausedAt);
+
 }
 
 function updateTime() {
-    if (audio.isPlaying == true) {
+    if (roominfo.value.isPlaying == true) {
         audio.currentTime = AudioContext.currentTime - audio.startTime;
         roominfo.value.nowplaying.time.current = audio.currentTime;
 
