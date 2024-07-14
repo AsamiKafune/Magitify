@@ -519,7 +519,8 @@
                                 <i class="fas fa-globe-asia"></i>
                             </div> เข้าร่วม
                         </button>
-                        <button v-if="!isJoin" @click="(() => { toggleSearchRoom = true; toggleController = false; getRoomList() })"
+                        <button v-if="!isJoin"
+                            @click="(() => { toggleSearchRoom = true; toggleController = false; getRoomList() })"
                             class="w-[120px] text-white hover:text-white/80 transition-all active:scale-95 flex gap-2 items-center justify-center bg-zinc-800/60 backdrop-blur-sm px-3 py-0.5 rounded-xl">
                             <div class="flex items-center justify-center text-white rounded-xl">
                                 <i class="fas fa-search"></i>
@@ -545,8 +546,7 @@
 
             <div
                 class="mx-auto max-w-2xl py-3 ps-3 pr-4 backdrop-blur-sm  bg-zinc-900/70 rounded-xl shadow-xl relative overflow-clip">
-                <div 
-                    :style="{ width: (roominfo.nowplaying.time.current / roominfo.nowplaying.time.duration * 100) + '%' }"
+                <div :style="{ width: (roominfo.nowplaying.time.current / roominfo.nowplaying.time.duration * 100) + '%' }"
                     class="bg-white/[0.15] transition-all duration-150 pointer-events-none h-full top-[0px] left-0 absolute">
                 </div>
                 <div class="flex gap-3 items-center justify-between w-full">
@@ -846,7 +846,6 @@ onMounted(() => {
                 //from Host -> selfsync!
                 if (msg.data.type == "respone_sync") {
                     stop();
-                    console.log(msg.data.room.isPlaying, msg.data.room.queues[0])
                     if (msg.data.room.isPlaying && msg.data.room.queues[0]) {
                         play(msg.data.room.queues[0], msg.data.room.nowplaying.time.current, "server");
                     }
@@ -1339,23 +1338,26 @@ function updateTime() {
         if (audio.currentTime >= audio.duration - 0.5) {
             if ((isJoin.value && isHost.value) || (!isJoin.value && !isHost.value)) {
                 if (roominfo.value.repeat == 1)
-                    return play(song)
+                    play(song)
                 if (roominfo.value.repeat == 2) {
-                    return nextQueue(true)
+                    nextQueue(true)
                 }
                 if (roominfo.value.repeat == 0) {
-                    if (!roominfo.value.queues[1]) return swal.fire({
-                        html: "<div><h1 class='text-3xl font-bold'>MAGITIFY</h1><p>คิวเพลงถูกเล่นทั้งหมดแล้ว</p></div>",
-                        icon: "success",
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true,
-                        allowOutsideClick: false,
-                        didOpen: (toast) => {
-                            toast.onmouseleave = swal.resumeTimer
-                        }
-                    })
-                    return nextQueue(false)
+                    if (!roominfo.value.queues[1]) {
+                        swal.fire({
+                            html: "<div><h1 class='text-3xl font-bold'>MAGITIFY</h1><p>คิวเพลงถูกเล่นทั้งหมดแล้ว</p></div>",
+                            icon: "success",
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            allowOutsideClick: false,
+                            didOpen: (toast) => {
+                                toast.onmouseleave = swal.resumeTimer
+                            }
+                        })
+                    } else {
+                        nextQueue(false)
+                    }
                 }
             }
         }
