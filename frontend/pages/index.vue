@@ -544,16 +544,16 @@
 
 
             <div
-                class="mx-auto max-w-2xl py-3 ps-3 pr-4 backdrop-blur-sm  bg-zinc-900/90 rounded-xl shadow-xl relative overflow-clip">
-                <div :class="{ 'opacity-0': toggleController }"
+                class="mx-auto max-w-2xl py-3 ps-3 pr-4 backdrop-blur-sm  bg-zinc-900/70 rounded-xl shadow-xl relative overflow-clip">
+                <div 
                     :style="{ width: (roominfo.nowplaying.time.current / roominfo.nowplaying.time.duration * 100) + '%' }"
-                    class="bg-white/[0.04] transition-all duration-150 pointer-events-none h-full top-[0px] left-0 absolute">
+                    class="bg-white/[0.15] transition-all duration-150 pointer-events-none h-full top-[0px] left-0 absolute">
                 </div>
                 <div class="flex gap-3 items-center justify-between w-full">
                     <div class="flex gap-3 items-center w-full">
                         <img @click="toggleController = !toggleController"
                             :src="roominfo.queues[0]?.img ?? 'https://dummyimage.com/512x512/fff/000&text=+'"
-                            class="max-w-[50px] cursor-pointer  aspect-square object-cover rounded-xl">
+                            class="max-w-[50px] cursor-pointer shadow-md shadow-black/50 z-10  aspect-square object-cover rounded-xl">
                         <button v-if="roominfo.queues[0]"
                             @click="(() => { toggleAddToPlaylist = true; tempfav = roominfo.queues[0] })">
                             <i class="fas fa-heart"></i>
@@ -595,14 +595,14 @@
                         </div>
                         <input :disabled="(isJoin && !isHost)" step="0.01" @input="seekLocal" min=0
                             v-model="roominfo.nowplaying.time.current" :max="roominfo.nowplaying.time.duration ?? 0"
-                            class="w-full" type="range">
+                            class="w-full z-10" type="range">
                     </div>
                     <div class="shadow flex gap-2 min-w-[100px] justify-center">
                         <div class="flex items-center justify-center w-[20px]">
                             <i
                                 :class="{ 'fad fa-volume': volume > 0.5, 'fad fa-volume-down': volume < 0.5 > 0.1, 'fad fa-volume-mute': volume <= 0 }"></i>
                         </div>
-                        <input step="0.01" @input="updateVolume" max=1 min=0 v-model="volume" class="w-full"
+                        <input step="0.01" @input="updateVolume" max=1 min=0 v-model="volume" class="z-10 w-full"
                             type="range">
                     </div>
                 </div>
