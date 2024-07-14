@@ -1,7 +1,6 @@
 # MAGITIFY
 Spotify alt webui for playing song sync with your friends!
 
-
 ## Features
 
 - Playing song
@@ -12,12 +11,6 @@ Spotify alt webui for playing song sync with your friends!
 - ChatRoom
 - Playlist
 - Cross platform
-
-## IOS Users Features Unsupport
-
-- Sync song with your friends
-- Seek
-- volume controller
 
 ## Preview
 

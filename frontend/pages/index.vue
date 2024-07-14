@@ -50,7 +50,8 @@
                 </button>
             </div>
             <div class="grid gap-2 mt-4 max-h-[200px] overflow-y-scroll rounded-b-xl">
-                <button @click="joinroom(item.invitecode)" class="w-[260px] mx-auto px-2 py-1 bg-white/10 rounded-md" v-for="item in roomlist">
+                <button @click="joinroom(item.invitecode)" class="w-[260px] mx-auto px-2 py-1 bg-white/10 rounded-md"
+                    v-for="item in roomlist">
                     <div class="text-start flex justify-between">
                         <div class="truncate">
                             {{ item.roomname }}
@@ -182,7 +183,8 @@
                     <p class="absolute left-4 top-1 text-xs text-white/40 pointer-events-none">ไอดีของห้องเพลง
                     </p>
                     <div class="flex bg-white/10 rounded-xl px-3">
-                        <input type="text" v-model="roomInputId" class="w-full pt-5 bg-transparent pb-2 px-1 outline-none">
+                        <input type="text" v-model="roomInputId"
+                            class="w-full pt-5 bg-transparent pb-2 px-1 outline-none">
                     </div>
                 </div>
                 <button @click="join"
@@ -211,7 +213,7 @@
                 </div>
             </div>
             <div class="h-[300px] w-[225px] px-3 py-1.5 mb-1 break-words overflow-y-auto">
-                <div v-for=" item  in  messageList ">
+                <div v-for=" item in messageList ">
                     <div v-if="item.msgType == '1'" class="ps-4 flex gap-1 my-2 text-sm justify-center w-full">
                         <div class="truncate">
                             {{ item.name }} {{ item.msg }}
@@ -288,7 +290,8 @@
                             {{ roominfo.canRequest ? "รีเควสได้" : "ถูกปิดไว้" }}
                         </div>
                         <button @click="toggleRequest" :disabled="!isHost">
-                            <i :class="{ 'fas fa-check': roominfo.canRequest, 'fas fa-times': !roominfo.canRequest }"></i>
+                            <i
+                                :class="{ 'fas fa-check': roominfo.canRequest, 'fas fa-times': !roominfo.canRequest }"></i>
                         </button>
                     </div>
                 </div>
@@ -300,7 +303,8 @@
             <div class="flex min-w-[350px] max-w-xl mx-auto">
                 <div class="w-full">
                     <input @input="search" ref="input_search" v-model="searchinput" type="text"
-                        class="w-full rounded-l-full bg-zinc-700 text-start px-4 outline-none py-2" placeholder="ค้นหาเพลง">
+                        class="w-full rounded-l-full bg-zinc-700 text-start px-4 outline-none py-2"
+                        placeholder="ค้นหาเพลง">
                 </div>
                 <button @click="toggleSearch = false" class="rounded-r-full bg-zinc-700 w-[50px]">
                     <i class="fas fa-times"></i>
@@ -308,7 +312,7 @@
             </div>
             <div
                 class="rounded-lg pb-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:max-h-[90svh] max-h-[85svh] mt-5 overflow-y-auto">
-                <div v-for=" item  in  searchlist ">
+                <div v-for=" item in searchlist ">
                     <div class="bg-zinc-900 rounded-md overflow-clip relative w-full">
                         <img :src="item.img" class="aspect-video object-cover pointer-events-none" alt="thumbnail">
                         <div class="text-start p-3 relative">
@@ -318,7 +322,8 @@
                                     @click="(() => { toggleAddToPlaylist = true; tempfav = item })">
                                     <i class="fas fa-heart text-xl"></i>
                                 </button>
-                                <button class="transition-all active:scale-90 hover:opacity-85" @click="addtoQueue(item)">
+                                <button class="transition-all active:scale-90 hover:opacity-85"
+                                    @click="addtoQueue(item)">
                                     <i class="fas fa-plus text-xl"></i>
                                 </button>
                             </div>
@@ -369,7 +374,7 @@
                     <hr class="mx-auto w-[60px] my-2 opacity-30">
                     <div class="px-4 pb-5 lg:pb-28 flex flex-col gap-2 h-[calc(100dvh-85px)] overflow-y-auto">
                         <div :class="{ 'bg-white/20': selectPlaylist == item.name }"
-                            class="w-full flex justify-between bg-white/10 rounded-md" v-for=" item  in   favlist  ">
+                            class="w-full flex justify-between bg-white/10 rounded-md" v-for=" item in favlist  ">
                             <button @click="selectPlaylist = item.name" class="w-full text-sm text-start truncate p-2">
                                 {{ item.name }}
                             </button>
@@ -400,7 +405,7 @@
                         </p>
                     </div>
                     <div class="rounded-lg pb-2 flex gap-2 overflow-x-auto max-w-full max-h-[120px]">
-                        <div v-for="  item, idx   in   roominfo.queues  ">
+                        <div v-for="  item, idx in roominfo.queues  ">
                             <div :class="{ 'border border-purple-400': idx == 0 }"
                                 class="bg-zinc-900 rounded-md overflow-clip flex w-[350px] relative shadow-lg">
                                 <div
@@ -447,12 +452,13 @@
                 <div v-if="favlist.find(e => e.name == selectPlaylist) && toggleSearch == false">
                     <div class="mt-4 mb-2 gap-2 flex items-center">
                         <p>
-                            เพลย์ลิส {{ favlist.find(e => e.name == selectPlaylist).name }} ({{ JSON.parse(favlist.find(e =>
-                                e.name == selectPlaylist).data).length }})
+                            เพลย์ลิส {{ favlist.find(e => e.name == selectPlaylist).name }} ({{
+                                JSON.parse(favlist.find(e =>
+                                    e.name == selectPlaylist).data).length }})
                         </p>
                     </div>
                     <div class="rounded-lg pb-2 grid gap-2">
-                        <div v-for=" item   in   JSON.parse(favlist.find(e => e.name == selectPlaylist).data)  ">
+                        <div v-for=" item in JSON.parse(favlist.find(e => e.name == selectPlaylist).data)  ">
                             <div :class="{ 'bg-white/[0.11] border border-white/10': item.id == roominfo.nowplaying.data.id }"
                                 class="bg-white/5 backdrop-blur-lg gap-2 pr-5 rounded-xl overflow-clip flex justify-between shadow-lg">
                                 <div class="flex">
@@ -564,7 +570,8 @@
                                 :class="{ 'fas fa-repeat': roominfo.repeat == 2, 'fas fa-repeat-1-alt': roominfo.repeat == 1, 'fas fa-random': roominfo.repeat == 0 }"></i>
                         </button>
                         <button class="text-white hover:text-white/80 transition-all active:scale-50"
-                            :disabled="(!isHost && isJoin)" @click="(() => { if (isHost || !isJoin) { toggleAudio() } })">
+                            :disabled="(!isHost && isJoin)"
+                            @click="(() => { if (isHost || !isJoin) { toggleAudio() } })">
                             <i :class="{ 'fas fa-pause': roominfo.isPlaying, 'fas fa-play': !roominfo.isPlaying }"></i>
                         </button>
                         <button class="text-white hover:text-white/80 transition-all active:scale-50"
@@ -581,17 +588,17 @@
                             {{ timeString(roominfo.nowplaying.time.duration -
                                 roominfo.nowplaying.time.current) }}
                         </div>
-                        <input :disabled="(isJoin && !isHost)" step="0.01" @input="seek()" min=0
-                            v-model="roominfo.nowplaying.time.current" :max="roominfo.nowplaying.time.duration"
+                        <input :disabled="(isJoin && !isHost)" step="0.01" @input="seekLocal" min=0
+                            v-model="roominfo.nowplaying.time.current" :max="roominfo.nowplaying.time.duration ?? 0"
                             class="w-full" type="range">
                     </div>
                     <div class="shadow flex gap-2 min-w-[100px] justify-center">
-                        <audio controls class="hidden" ref="audio" src="" />
                         <div class="flex items-center justify-center w-[20px]">
                             <i
                                 :class="{ 'fad fa-volume': volume > 0.5, 'fad fa-volume-down': volume < 0.5 > 0.1, 'fad fa-volume-mute': volume <= 0 }"></i>
                         </div>
-                        <input step="0.01" @input="updateVolume" max=1 min=0 v-model="volume" class="w-full" type="range">
+                        <input step="0.01" @input="updateVolume" max=1 min=0 v-model="volume" class="w-full"
+                            type="range">
                     </div>
                 </div>
             </div>
@@ -662,8 +669,19 @@ async function search() {
     }, 500);
 }
 
+let cooldownSync = 0;
+let AudioContext;
+let gainNode;
+let audio = {
+    source: null,
+    Buffer: null,
+    startTime: 0,
+    pausedAt: 0,
+    currentTime: 0,
+    duration: 0,
+    isPlaying: false
+}
 
-const audio = ref(null);
 const volume = ref(0.15);
 
 const roomlist = ref([]);
@@ -713,6 +731,7 @@ const handleResize = () => {
 watch(() => window.innerWidth, handleResize);
 
 onMounted(() => {
+    AudioContext = new (window.AudioContext || window.webkitAudioContext)();
     window.addEventListener('resize', handleResize);
     const server = io(config.api)
     server.on('connect', () => {
@@ -822,6 +841,7 @@ onMounted(() => {
                 //from Host -> selfsync!
                 if (msg.data.type == "respone_sync") {
                     stop();
+                    console.log(msg.data.room.isPlaying, msg.data.room.queues[0])
                     if (msg.data.room.isPlaying && msg.data.room.queues[0]) {
                         play(msg.data.room.queues[0], msg.data.room.nowplaying.time.current, "server");
                     }
@@ -836,13 +856,13 @@ onMounted(() => {
             if (msg.isOwner) {
                 //from owner
                 if (msg.data.type == "toggleAudio") {
-                    toggleAudio(msg.data.value)
+                    toggleAudio(`${msg.data.value}`)
                 }
                 if (msg.data.type == "respone_forcesync") {
                     const _c = msg.data
                     if (msg.data.action) {
                         stop();
-                        if (_c.room.isPlaying && _c.room.queues[0]) {
+                        if (_c.room.queues[0]) {
                             play(_c.room.queues[0], _c.room.nowplaying.time.current, "server");
                         }
                     }
@@ -997,7 +1017,7 @@ function getFav() {
                 data: e.data
             })
         } catch (error) {
-            console.log("Error:", error)
+            // console.log("Error:", error)
         }
     })
     return f_fav
@@ -1046,7 +1066,23 @@ function createPlaylist() {
 }
 
 async function syncmusic() {
+    if (cooldownSync > Date.now()) return $swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.onmouseenter = swal.stopTimer;
+            toast.onmouseleave = swal.resumeTimer
+        }
+    }).fire({
+        icon: "error",
+        html: "<div><h1 class='text-white/60 font-bold'>ผิดพลาด</h1><p>กรุณารอสักครู่ก่อน ReSync</p></div>"
+    });
+
     socket.value.emit('send', { invitecode: roomInputId.value, data: { type: "request_sync", userId: myid.value } });
+    cooldownSync = Date.now() + (5 * 1000)
 }
 
 async function toggleRequest() {
@@ -1148,6 +1184,7 @@ async function addtoQueue(song, isServer) {
 async function stop() {
     //stop current music!
     roominfo.value.isPlaying = false;
+    audio.isPlaying = false
     roominfo.value.nowplaying = {
         data: {},
         time: {
@@ -1155,11 +1192,10 @@ async function stop() {
             duration: 0
         }
     }
-    if (audio.value) {
-        audio.value.pause();
-        audio.value.src = null;
-        audio.value = null;
-    }
+    try {
+        audio.source.stop();
+    } catch (error) { }
+    audio.isPlaying = false;
 }
 
 async function loopstate(value) {
@@ -1227,18 +1263,29 @@ async function play(song, now, isServer) {
 
         //play logic
         setTimeout(() => {
-            audio.value.src = config.api + "/music/" + song.id + '.mp3'
-            roominfo.value.nowplaying = {
-                data: song,
-                time: {
-                    current: audio.value.currentTime,
-                    duration: 0,
-                }
-            }
-            roominfo.value.isPlaying = true;
-            audio.value.play();
-            if (now) audio.value.currentTime = now;
-            audio.value.volume = volume.value;
+
+            fetch(config.api + "/music/" + song.id + '.mp3')
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => AudioContext.decodeAudioData(arrayBuffer))
+                .then(decodedAudioBuffer => {
+                    audio.Buffer = decodedAudioBuffer;
+
+                    roominfo.value.nowplaying = {
+                        data: song,
+                        time: {
+                            current: 0,
+                            duration: audio.Buffer.duration,
+                        }
+                    }
+
+                    //reset time
+                    audio.currentTime = 0
+                    audio.pausedAt = 0
+                    audio.startTime = 0
+                    audio.duration = audio.Buffer.duration
+
+                    playAudio(now)
+                })
 
             //boardcast to everyone
             if (isHost.value && isJoin.value) {
@@ -1246,40 +1293,6 @@ async function play(song, now, isServer) {
             } if (!isHost.value && isJoin.value && !isServer && roominfo.value.canRequest) {
                 socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "request_play", value: song, ignore: myid.value } });
             }
-
-            audio.value.addEventListener('timeupdate', function () {
-                try {
-                    roominfo.value.nowplaying.time.current = audio.value.currentTime
-                    roominfo.value.nowplaying.time.duration = audio.value.duration
-                } catch (error) { }
-
-                if (audio.value) {
-                    //next song
-                    if (audio.value.currentTime >= audio.value.duration - 1) {
-                        if ((isJoin.value && isHost.value) || (!isJoin.value && !isHost.value)) {
-                            if (roominfo.value.repeat == 1)
-                                return play(song)
-                            if (roominfo.value.repeat == 2) {
-                                return nextQueue(true)
-                            }
-                            if (roominfo.value.repeat == 0) {
-                                if (!roominfo.value.queues[1]) return swal.fire({
-                                    html: "<div><h1 class='text-3xl font-bold'>MAGITIFY</h1><p>คิวเพลงถูกเล่นทั้งหมดแล้ว</p></div>",
-                                    icon: "success",
-                                    showConfirmButton: false,
-                                    timer: 3000,
-                                    timerProgressBar: true,
-                                    allowOutsideClick: false,
-                                    didOpen: (toast) => {
-                                        toast.onmouseleave = swal.resumeTimer
-                                    }
-                                })
-                                return nextQueue(false)
-                            }
-                        }
-                    }
-                }
-            });
         }, 100);
     } catch (error) {
         console.log(error)
@@ -1288,53 +1301,139 @@ async function play(song, now, isServer) {
 }
 
 //controller
-async function updateVolume() {
-    if (audio.value) audio.value.volume = volume.value;
-    else volume.value = 0.2;
+function playAudio(pos) {
+    audio.source = AudioContext.createBufferSource();
+    audio.source.buffer = audio.Buffer;
+
+    //set volume
+    gainNode = AudioContext.createGain();
+    gainNode.gain.value = volume.value
+    audio.source.connect(gainNode);
+    gainNode.connect(AudioContext.destination);
+
+    //settime!
+    if (pos) {
+        audio.pausedAt = pos;
+        audio.startTime = AudioContext.currentTime - audio.pausedAt;
+    } else {
+        audio.startTime = AudioContext.currentTime;
+    }
+    audio.source.start(0, audio.pausedAt);
+
+    audio.isPlaying = true
+    roominfo.value.isPlaying = true
 }
 
-async function toggleAudio(value) {
-    if (audio.value) {
-        if (value) {
-            if (value == 'playing') {
-                audio.value.play();
-                roominfo.value.isPlaying = true;
-                return;
-            }
-            else {
-                audio.value.pause();
-                roominfo.value.isPlaying = false;
-                return;
-            }
-        } else {
-            if (roominfo.value.isPlaying) {
-                audio.value.pause();
-                roominfo.value.isPlaying = false;
-            } else {
-                audio.value.play();
-                roominfo.value.isPlaying = true;
-            }
+function updateTime() {
+    if (audio.isPlaying == true) {
+        audio.currentTime = AudioContext.currentTime - audio.startTime;
+        roominfo.value.nowplaying.time.current = audio.currentTime;
 
-            if (isHost.value) {
-                socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "toggleAudio", value: roominfo.value.isPlaying ? "playing" : "stoped" } });
+        //next song
+        if (audio.currentTime >= audio.duration - 0.5) {
+            if ((isJoin.value && isHost.value) || (!isJoin.value && !isHost.value)) {
+                if (roominfo.value.repeat == 1)
+                    return play(song)
+                if (roominfo.value.repeat == 2) {
+                    return nextQueue(true)
+                }
+                if (roominfo.value.repeat == 0) {
+                    if (!roominfo.value.queues[1]) return swal.fire({
+                        html: "<div><h1 class='text-3xl font-bold'>MAGITIFY</h1><p>คิวเพลงถูกเล่นทั้งหมดแล้ว</p></div>",
+                        icon: "success",
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        allowOutsideClick: false,
+                        didOpen: (toast) => {
+                            toast.onmouseleave = swal.resumeTimer
+                        }
+                    })
+                    return nextQueue(false)
+                }
             }
         }
     }
+    requestAnimationFrame(updateTime)
 }
-async function seek(value) {
-    if (audio.value) {
-        if (value) {
-            audio.value.currentTime = value;
-            roominfo.value.nowplaying.time.current = value;
+updateTime()
+
+function pauseAudio() {
+    if (!audio.isPlaying) return;
+
+    audio.isPlaying = false;
+    roominfo.value.isPlaying = false;
+
+    audio.pausedAt = AudioContext.currentTime - audio.startTime;
+    audio.source.stop();
+}
+
+async function updateVolume() {
+    if (gainNode) {
+        gainNode.gain.value = volume.value;
+    } else {
+        volume.value = 0.15
+    }
+}
+
+async function toggleAudio(value) {
+    if (value) {
+        if (value == 'playing') {
+            playAudio(audio.currentTime)
+            roominfo.value.isPlaying = true;
+            return;
+        }
+        else {
+            pauseAudio();
+            roominfo.value.isPlaying = false;
+            return;
+        }
+    } else {
+        if (roominfo.value.isPlaying) {
+            pauseAudio();
+            roominfo.value.isPlaying = false;
         } else {
-            audio.value.currentTime = roominfo.value.nowplaying.time.current;
+            playAudio(audio.currentTime)
+            roominfo.value.isPlaying = true;
+        }
+
+        if (isHost.value) {
+            socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "toggleAudio", value: roominfo.value.isPlaying ? "playing" : "stoped" } });
+        }
+    }
+}
+
+async function seek(value) {
+    if (audio.isPlaying) {
+        if (value) {
+            audio.pausedAt = value;
+            pauseAudio()
+            playAudio(value)
+
+            roominfo.value.nowplaying.time.current = value;
+        }
+    } else {
+        roominfo.value.nowplaying.time.current = 0;
+    }
+}
+
+async function seekLocal(event) {
+    const pos = parseFloat(event?.target?.value)
+    if (audio.isPlaying) {
+        if (pos) {
+            audio.pausedAt = pos;
+            pauseAudio()
+            playAudio(pos)
+            roominfo.value.nowplaying.time.current = pos;
+            audio.currentTime = roominfo.value.nowplaying.time.current;
             if (isHost.value) {
                 socket.value.emit('send', { invitecode: roominfo.value.id, data: { type: "seek", value: roominfo.value.nowplaying.time.current } });
             }
+        } else {
+            roominfo.value.nowplaying.time.current = 0;
         }
-    } else roominfo.value.nowplaying.time.current = 0;
+    }
 }
-
 //utils
 async function recheckfile(id) {
     try {
