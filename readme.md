@@ -16,6 +16,7 @@ Spotify alt webui for playing song sync with your friends!
 ## KnowBug
 
 - Mobile Device Can't Play in backgound
+- Player is stoped when unfucus
 
 ## Preview
 
