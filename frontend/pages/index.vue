@@ -736,7 +736,14 @@ const handleResize = () => {
 watch(() => window.innerWidth, handleResize);
 
 onMounted(() => {
-    AudioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    //create AudioContext
+    document.addEventListener('click', function () {
+        if (!AudioContext) {
+            AudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    });
+
     window.addEventListener('resize', handleResize);
     const server = io(config.api)
     server.on('connect', () => {
