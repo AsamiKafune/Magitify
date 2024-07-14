@@ -12,6 +12,11 @@ Spotify alt webui for playing song sync with your friends!
 - Playlist
 - Cross platform
 
+
+## KnowBug
+
+- Mobile Device Can't Play in backgound
+
 ## Preview
 
 ![img](https://cdn.aona.in.th/1hmrt1tka/Screenshot%202024-02-18%20010534.png)
