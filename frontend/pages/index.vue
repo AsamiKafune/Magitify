@@ -1337,39 +1337,40 @@ function playAudio(pos) {
 }
 
 function updateTime() {
-    if (roominfo.value.isPlaying == true) {
-        audio.currentTime = AudioContext.currentTime - audio.startTime;
-        roominfo.value.nowplaying.time.current = audio.currentTime;
+    setInterval(() => {
+        if (roominfo.value.isPlaying == true) {
+            audio.currentTime = AudioContext.currentTime - audio.startTime;
+            roominfo.value.nowplaying.time.current = audio.currentTime;
 
-        //next song
-        if (audio.currentTime >= audio.duration - 0.5) {
-            if ((isJoin.value && isHost.value) || (!isJoin.value && !isHost.value)) {
-                if (roominfo.value.repeat == 1)
-                    play(song)
-                if (roominfo.value.repeat == 2) {
-                    nextQueue(true)
-                }
-                if (roominfo.value.repeat == 0) {
-                    if (!roominfo.value.queues[1]) {
-                        swal.fire({
-                            html: "<div><h1 class='text-3xl font-bold'>MAGITIFY</h1><p>คิวเพลงถูกเล่นทั้งหมดแล้ว</p></div>",
-                            icon: "success",
-                            showConfirmButton: false,
-                            timer: 3000,
-                            timerProgressBar: true,
-                            allowOutsideClick: false,
-                            didOpen: (toast) => {
-                                toast.onmouseleave = swal.resumeTimer
-                            }
-                        })
-                    } else {
-                        nextQueue(false)
+            //next song
+            if (audio.currentTime >= audio.duration - 0.5) {
+                if ((isJoin.value && isHost.value) || (!isJoin.value && !isHost.value)) {
+                    if (roominfo.value.repeat == 1)
+                        play(song)
+                    if (roominfo.value.repeat == 2) {
+                        nextQueue(true)
+                    }
+                    if (roominfo.value.repeat == 0) {
+                        if (!roominfo.value.queues[1]) {
+                            swal.fire({
+                                html: "<div><h1 class='text-3xl font-bold'>MAGITIFY</h1><p>คิวเพลงถูกเล่นทั้งหมดแล้ว</p></div>",
+                                icon: "success",
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                allowOutsideClick: false,
+                                didOpen: (toast) => {
+                                    toast.onmouseleave = swal.resumeTimer
+                                }
+                            })
+                        } else {
+                            nextQueue(false)
+                        }
                     }
                 }
             }
         }
-    }
-    requestAnimationFrame(updateTime)
+    }, 10);
 }
 updateTime()
 
