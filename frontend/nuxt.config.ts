@@ -35,7 +35,9 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      api: "https://alt-magitify.kfn.moe",
+      api:"http://localhost:3011",
+      // api: "https://alt-magitify.kfn.moe",
+      // api: "https://api-magitify-backend.kfn.moe",
     }
   },
   css: ["~/assets/main.css"]

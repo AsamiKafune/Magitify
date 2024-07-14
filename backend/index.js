@@ -3,7 +3,7 @@ const fastify = require("fastify")({ logger: false })
 const { Server } = require("socket.io");
 const path = require("path");
 const fs = require("fs")
-const ytdl = require('ytdl-core');
+const ytdl = require("@distube/ytdl-core");
 
 fastify.options('*', function (request, reply) {
     reply.send()
@@ -177,7 +177,7 @@ fastify.get("/allchannel", async (req, res) => {
 fastify.listen({ port: 3011, host: "0.0.0.0" })
     .then(() => console.log("Magitify WebApi - Coding by Kafune Ch. | server has running!"))
 
-function cacheSong(song) {
+async function cacheSong(song) {
     return new Promise(async (resolve, reject) => {
         const _library = getsongLibrary()
         const find_song = _library.find(e => e.id == song.id)
@@ -226,7 +226,8 @@ function cacheSong(song) {
     });
 }
 
-function download_music(_temp, song) {
+async function download_music(_temp, song) {
+    console.log("call download function")
     return new Promise((resolve, reject) => {
         _temp.push({
             "canplay": false,
